@@ -7,8 +7,8 @@ from app.ingress.modules.block_management import BlockData
 from app.ingress.modules.ip_management import IpData
 
 def main():
-    # BlockData().create()
-    IpData().create()
+    BlockData().create_table()
+    IpData().create_table()
 
 if __name__ == '__main__':
     main()

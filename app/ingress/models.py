@@ -6,8 +6,10 @@ class IPs(BaseModel):
 
 
 class Block(BaseModel):
-    pow_token: str
-    # block_content: str
-    # predicessor: str
-    # proposer_pk: str
+    
+    pow_token: bytes  # [md5(block_content, 128bits)] | md5(predicessor, 128) | md5(proposer_pk, 128)] | nounce (128) """
+    
+    block_content: str
+    predicessor: str  # pow_token of predicessor
+    proposer_pk: str
     # nounce: str

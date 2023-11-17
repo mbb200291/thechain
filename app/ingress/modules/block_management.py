@@ -5,7 +5,7 @@ from ...utils.db_management import DbConnection
 
 
 class BlockData(DbConnection):
-    def create(self):
+    def create_table(self):
         cursor = self.conn.cursor()
 
         cursor.execute('DROP TABLE IF EXISTS Blocks')
@@ -30,23 +30,30 @@ class BlockData(DbConnection):
         self.conn.commit()
         self.conn.close()
 
-    # def get_ips(self):
-                
-    #     cursor = self.conn.cursor()
-    #     cursor.execute('SELECT * FROM ip_addresses')
-    #     rows = cursor.fetchall()
-    #     for row in rows:
-    #         print(row)
+    def hang_block(self, pow_token, predicessor):
+        cursor = self.conn.cursor()
         
-    #     self.conn.close()
-    #     return rows
+        # check whether or not exist 
+        cursor.execute("SELECT * FROM Blocks WHERE id = ? AND current_tip = 1",
+                       (predicessor,))
+        predicessor_exist = cursor.fetchone() is not None  # TODO: 需改成假使predicessor不存在則阻止插入
 
-    # def extend_ips(self, ips: list[str]):
-    #     cursor = self.conn.cursor()
-    #     cursor.executemany('INSERT INTO ip_addresses (ip_address) VALUES (?)', [(ip,) for ip in ips])
-    #     self.conn.commit()
-    #     self.conn.close()
-
+        cursor.execute("SELECT * FROM Blocks WHERE predicessor = ?",
+                       (predicessor,))
+        condition2_met = cursor.fetchone() is not None
+        
+        if 
+        
+        # append
+        cursor.execute(
+            'INSERT INTO Blocks (id, current_tip, predicessor) VALUES (?, ?)', (
+                pow_token,
+                0,
+                predicessor,
+                )
+            )
+        self.conn.commit()
+        self.conn.close()
 
 def convert_bytes_to_binstr(x: bytes) -> str:
     return "{:08b}".format(int(x.hex(), 16)) 
@@ -60,9 +67,26 @@ def count_leading_zero(binstr) -> int:
     return count
 
 
-def verify_block(x: bytes) -> bool:
+def verify_block_attribute(block) -> bool:
+    hasher_md5 = hashlib.md5()
+    pow_token = block['pow_token']
+    return (
+        (hasher_md5(block['block_content']) == pow_token[:16])  # slice on bytes (8 bits)
+        and (hasher_md5(block['predicessor']) == pow_token[16:32])
+        and (hasher_md5(block['proposer_pk']) == pow_token[32:48])
+    )
+    
+    
+def verify_block_pow(x: bytes) -> bool:
     sha256 = hashlib.sha256()
     sha256.update(x)
-    hash_result = convert_bytes_to_binstr(sha256.digest())
-    leading_zero = count_leading_zero(hash_result)
+    binary_str = convert_bytes_to_binstr(sha256.digest())
+    leading_zero = count_leading_zero(binary_str)
     return leading_zero >= TAU
+
+
+def verify(block) -> bool:
+    return verify_block_attribute(block) and verify_block_pow(block['pow_token'])
+
+def hang_block(block):
+    BlockData()

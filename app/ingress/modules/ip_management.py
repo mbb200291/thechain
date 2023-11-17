@@ -2,7 +2,7 @@ from ...utils.db_management import DbConnection
 
 
 class IpData(DbConnection):
-    def create(self):
+    def create_table(self):
         cursor = self.conn.cursor()
         
         cursor.execute('DROP TABLE IF EXISTS IPs')
