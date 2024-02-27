@@ -1,2 +1,3 @@
-TAU = 128
-SEED_URL = ['localhost:8000']
+# TAU = 128
+TAU = 1
+SEED_URL = ['localhost:7573']

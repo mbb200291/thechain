@@ -1,4 +1,5 @@
 import hashlib
+import base64
 
 from ...config import TAU
 from ...utils.db_management import DbConnection
@@ -13,43 +14,48 @@ class BlockData(DbConnection):
         cursor.execute('''
             CREATE TABLE Blocks (
                 id TEXT PRIMARY KEY,
+                depth INT NOT NULL,
+
                 predicessor TEXT NULL,
-                depth INT NOT NULL
+                block_content TEXT NOT NULL,
+                proposer_pk TEXT NOT NULL,
+                nounce BLOB NOT NULL
             )
         ''')
-                # pow_token TEXT NOT NULL
-                # block_content TEXT NOT NULL
-                # proposer_pk TEXT NOT NULL
-                # nounce TEXT NOT NULL
+        # pow_token TEXT NOT NULL
+        # block_content TEXT NOT NULL
+        # proposer_pk TEXT NOT NULL
+        # nounce TEXT NOT NULL
 
-        cursor.execute('INSERT INTO Blocks (id, depth) VALUES (?, ?)', (
-            "thegenesisblock",
-            0,
+        cursor.execute('INSERT INTO Blocks (id, depth, predicessor, block_content, proposer_pk, nounce) VALUES (?, ?, ?, ?, ?, ?)', (
+                "thegenesisblock",
+                0,
+                '',
+                '',
+                '',
+                bytes(),
             ))
-    
+
         self.conn.commit()
         self.conn.close()
 
-    
     def check_block_existence(self, pow_token):
+        print('predicessor token:', pow_token)
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM my_table WHERE id = ?", (pow_token,))
+        cursor.execute("SELECT * FROM `Blocks` WHERE id = ?", (pow_token,))
         data = cursor.fetchone()
         return bool(data)
 
-    def hang_block(self, pow_token, predicessor):
-        
+    def hang_block(
+            self, pow_token, predicessor, block_content, proposer_pk, nounce):
         cursor = self.conn.cursor()
 
         # append
         cursor.execute(
-            '''INSERT INTO Blocks (id, depth)  
-               SELECT (?), (depth + 1)
-               FROM Blocks 
-               WHERE id=(?);
+            '''INSERT INTO Blocks (id, depth, predicessor, block_content, proposer_pk, nounce)
+               VALUES (?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.id = ?), ?, ?, ?, ?);
                ''', (
-                pow_token,
-                predicessor,
+                pow_token, predicessor, predicessor, block_content, proposer_pk, nounce
                 )
             )
         self.conn.commit()
@@ -67,46 +73,70 @@ class BlockData(DbConnection):
         if row:
             return tip_id
         return None
-        
-def convert_bytes_to_binstr(x: bytes) -> str:
-    return "{:08b}".format(int(x.hex(), 16)) 
 
 
-def count_leading_zero(binstr) -> int:
+def bytes_to_binary_string(bytes_obj):
+    return ''.join(format(byte, '08b') for byte in bytes_obj)
+
+
+def count_leading_zero(token: bytes) -> int:
+    token_str = bytes_to_binary_string(token)
+    print('bins:', token_str)
     count = 0
-    for i in binstr:
+    for i in token_str:
         if i == '0':
             count += 1
+        else:
+            break
     return count
 
 
+def cal_md5(content: bytes):
+    hasher = hashlib.md5()
+    hasher.update(content)
+    return hasher.digest()
+
+
+# def cal_sh256(content: bytes):
+#     hasher = hashlib.sha256()
+#     hasher.update(content)
+#     return hasher.digest()
+
+
 def verify_block_attribute(block) -> bool:
-    hasher_md5 = hashlib.md5()
-    pow_token = block['pow_token']
-    return (
-        (hasher_md5(block['block_content']) == pow_token[:16])  # slice on bytes (8 bits)
-        and (hasher_md5(block['predicessor']) == pow_token[16:32])
-        and (hasher_md5(block['proposer_pk']) == pow_token[32:48])
-    )
-    
-    
+    hasher = hashlib.sha256()
+    hasher.update(cal_md5(block['block_content'].encode('utf8')))
+    hasher.update(cal_md5(block['predicessor'].encode('utf8')))
+    hasher.update(base64.b64decode(block['proposer_pk']))
+    hasher.update(base64.b64decode(block['nounce']))
+    return hasher.digest() == base64.b64decode(block['pow_token'])
+
+
 def verify_block_pow(x: bytes) -> bool:
-    sha256 = hashlib.sha256()
-    sha256.update(x)
-    binary_str = convert_bytes_to_binstr(sha256.digest())
-    leading_zero = count_leading_zero(binary_str)
+    leading_zero = count_leading_zero(x)
     return leading_zero >= TAU
 
 
 def verify(block) -> bool:
-    return (
-        verify_block_attribute(block)
-        and verify_block_pow(block['pow_token'])
-        and BlockData().check_block_existence(block['pow_token'])
+    print(verify_block_pow(base64.b64decode(block['pow_token'])),  # have to smaller than tau
+        verify_block_attribute(block),  # satisafy hash rule
+        BlockData().check_block_existence(block['predicessor'])  # whether block already exist
         )
+    return (
+        verify_block_pow(base64.b64decode(block['pow_token']))  # have to smaller than tau
+        and verify_block_attribute(block)  # satisafy hash rule
+        and BlockData().check_block_existence(block['predicessor'])  # whether block already exist
+        )
+
 
 def hang_block(block):
     return BlockData().hang_block(
         block['pow_token'],
-        block['predicessor']
+        block['predicessor'],
+        block['block_content'],
+        block['proposer_pk'],
+        block['nounce'],
     )
+
+
+# pow_token, predicessor, block_content, proposer_pk, nounce

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
 
+from .modules import ip_management, block_management
+from .schemas import Block, IPs
+# from .models import *
+# from .schemas import *
 
-from .modules import  ip_management, block_management
-from .models import *
-from .schemas import *
 
 router = APIRouter()
 
@@ -14,7 +15,7 @@ async def register(ips: list[IPs]):
 
 
 @router.get('/operation-nodes')
-async def get_operation_nodes(ips: list[IPs]) -> IpList:
+async def get_operation_nodes() -> IPs:
     return {
         "ips": ip_management.get_ips()
         }
@@ -24,4 +25,7 @@ async def get_operation_nodes(ips: list[IPs]) -> IpList:
 async def post_block(block: Block):
     block = block.model_dump()
     if block_management.verify(block):
-        block_management.hang_block(block)
+        result = block_management.hang_block(block)
+        return {"status": result}
+    else:
+        return {"status": "in-correct"}
