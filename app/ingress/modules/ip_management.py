@@ -26,7 +26,7 @@ class IpData(DbConnection):
     def get_ips(self):
 
         cursor = self.conn.cursor()
-        cursor.execute('SELECT * FROM ip')
+        cursor.execute('SELECT * FROM `IPs`')
         rows = cursor.fetchall()
         for row in rows:
             print(row)
