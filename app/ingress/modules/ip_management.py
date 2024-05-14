@@ -26,12 +26,12 @@ class IpData(DbConnection):
     def get_ips(self):
 
         cursor = self.conn.cursor()
-        cursor.execute('SELECT * FROM `IPs`')
+        cursor.execute('SELECT `ip` FROM `IPs`')
         rows = cursor.fetchall()
         for row in rows:
             print(row)
         self.conn.close()
-        return rows
+        return [x[0] for x in rows]
 
     def extend_ips(self, ips: list[str]):
         cursor = self.conn.cursor()

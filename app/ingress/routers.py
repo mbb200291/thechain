@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from .modules import ip_management, block_management
-from .schemas import Block, IPs
+from .schemas import Block, HttpUrl
 # from .models import *
 # from .schemas import *
 
@@ -10,15 +10,14 @@ router = APIRouter()
 
 
 @router.post('/register')
-async def register(ips: list[IPs]):
+async def register(ips: list[HttpUrl]):
     ip_management.extend_ips(ips.model_dump()['ip'])
 
 
 @router.get('/operation-nodes')
-async def get_operation_nodes() -> IPs:
-    return {
-        "ips": ip_management.get_ips()
-        }
+async def get_operation_nodes() -> list[HttpUrl]:
+    print('>>>', ip_management.get_ips())
+    return ip_management.get_ips()
 
 
 @router.post('/block')
