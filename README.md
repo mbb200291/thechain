@@ -4,6 +4,12 @@
     pip install -r requirements.txt
     ```
 
+# Setup
+
+    ```bash
+    python scripts/create_db.py
+    ```
+
 # Launch App
 
 ## mac

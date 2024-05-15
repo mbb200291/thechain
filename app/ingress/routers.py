@@ -11,12 +11,12 @@ router = APIRouter()
 
 @router.post('/register')
 async def register(ips: list[HttpUrl]):
-    ip_management.extend_ips(ips.model_dump()['ip'])
+    ip_management.extend_ips(ips)
+    return 1
 
 
 @router.get('/operation-nodes')
 async def get_operation_nodes() -> list[HttpUrl]:
-    print('>>>', ip_management.get_ips())
     return ip_management.get_ips()
 
 

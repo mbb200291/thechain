@@ -4,9 +4,7 @@ from ...utils.db_management import DbConnection
 class IpData(DbConnection):
     def create_table(self):
         cursor = self.conn.cursor()
-
         cursor.execute('DROP TABLE IF EXISTS IPs')
-
         cursor.execute('''
             CREATE TABLE IPs (
                 id INTEGER PRIMARY KEY,
@@ -15,7 +13,7 @@ class IpData(DbConnection):
         ''')
 
         ip_list = [
-            'localhost:7573',  # the broadcasting node
+            'http://localhost:7573',  # the broadcasting node
                    ]
         for ip in ip_list:
             cursor.execute('INSERT INTO IPs (ip) VALUES (?)', (ip,))
@@ -24,7 +22,6 @@ class IpData(DbConnection):
         self.conn.close()
 
     def get_ips(self):
-
         cursor = self.conn.cursor()
         cursor.execute('SELECT `ip` FROM `IPs`')
         rows = cursor.fetchall()
@@ -36,7 +33,7 @@ class IpData(DbConnection):
     def extend_ips(self, ips: list[str]):
         cursor = self.conn.cursor()
         cursor.executemany('INSERT INTO IPs (ip) VALUES (?)', [
-            (ip,) for ip in ips])
+            (str(ip),) for ip in ips])
         self.conn.commit()
         self.conn.close()
 
@@ -46,4 +43,4 @@ def get_ips():
 
 
 def extend_ips(ips):
-    return IpData().extend_ips()
+    return IpData().extend_ips(ips)
