@@ -1,5 +1,5 @@
 from ...utils.db_management import DbConnection
-
+from ...config import SEED_URLS
 
 class IpData(DbConnection):
     def create_table(self):
@@ -12,10 +12,10 @@ class IpData(DbConnection):
             )
         ''')
 
-        ip_list = [
-            'http://localhost:7573',  # the broadcasting node
-                   ]
-        for ip in ip_list:
+        # ip_list = [
+        #     'http://localhost:7573',  # the broadcasting node
+        #            ]
+        for ip in SEED_URLS:
             cursor.execute('INSERT INTO IPs (ip) VALUES (?)', (ip,))
 
         self.conn.commit()

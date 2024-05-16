@@ -2,8 +2,6 @@ from fastapi import APIRouter, HTTPException
 
 from .modules import ip_management, block_management
 from .schemas import Block, HttpUrl
-# from .models import *
-# from .schemas import *
 
 
 router = APIRouter()
