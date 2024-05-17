@@ -1,8 +1,8 @@
 import hashlib
 import base64
 
-from ...config import TAU
-from ...utils.db_management import DbConnection
+from ..config import TAU
+from .db_management import DbConnection
 
 
 class BlockData(DbConnection):
@@ -60,6 +60,7 @@ class BlockData(DbConnection):
             )
         self.conn.commit()
         self.conn.close()
+        return 1
 
     def get_tip(self) -> str:
         cursor = self.conn.cursor()
@@ -105,8 +106,8 @@ def cal_md5(content: bytes):
 
 def verify_block_attribute(block) -> bool:
     hasher = hashlib.sha256()
-    hasher.update(cal_md5(block['block_content'].encode('utf8')))
     hasher.update(cal_md5(block['predicessor'].encode('utf8')))
+    hasher.update(cal_md5(block['block_content'].encode('utf8')))
     hasher.update(base64.b64decode(block['proposer_pk']))
     hasher.update(base64.b64decode(block['nounce']))
     return hasher.digest() == base64.b64decode(block['pow_token'])
@@ -119,25 +120,14 @@ def verify_block_pow(x: bytes) -> bool:
 
 
 def verify(block) -> bool:
-    # print(verify_block_pow(base64.b64decode(block['pow_token'])),  # have to smaller than tau
-    #     verify_block_attribute(block),  # satisafy hash rule
-    #     BlockData().check_block_existence(block['predicessor'])  # whether block already exist
-    #     )
+    print('>1', verify_block_pow(base64.b64decode(block['pow_token'])))
+    print('>2', verify_block_attribute(block))
+    print('>3', BlockData().check_block_existence(block['predicessor']))
     return (
         verify_block_pow(base64.b64decode(block['pow_token']))  # have to smaller than tau
         and verify_block_attribute(block)  # satisafy hash rule
         and BlockData().check_block_existence(block['predicessor'])  # whether block already exist
         )
-
-
-def hang_block(block):
-    return BlockData().hang_block(
-        block['pow_token'],
-        block['predicessor'],
-        block['block_content'],
-        block['proposer_pk'],
-        block['nounce'],
-    )
 
 
 # pow_token, predicessor, block_content, proposer_pk, nounce

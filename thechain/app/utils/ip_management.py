@@ -1,5 +1,5 @@
-from ...utils.db_management import DbConnection
-from ...config import SEED_URLS
+from .db_management import DbConnection
+from ..config import SEED_URLS
 
 
 class IpData(DbConnection):
@@ -38,10 +38,13 @@ class IpData(DbConnection):
         self.conn.commit()
         self.conn.close()
 
+    def remove_ips(self, ips: list[str]):
+        cursor = self.conn.cursor()
+        cursor.executemany('DELETE FROM IPs WHERE ip = (?)', [
+            (str(ip),) for ip in ips])
+        self.conn.commit()
+        self.conn.close()
 
-def get_ips():
-    return IpData().get_ips()
 
-
-def extend_ips(ips):
-    return IpData().extend_ips(ips)
+# def extend_ips(ips):
+#     return IpData().extend_ips(ips)

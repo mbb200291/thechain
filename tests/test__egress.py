@@ -5,7 +5,8 @@ import dotenv
 import base64
 
 from thechain.app.egress.solving import (
-    create_pow_token, GENESIS_BLOCK, create_nounce)
+    create_pow_token, GENESIS_BLOCK, create_nounce, 
+    )
 
 
 dotenv.load_dotenv()
@@ -24,10 +25,12 @@ def test__create_block():
             GENESIS_BLOCK,
             "test input",
             os.getenv("PRIVATEKEY"),
-            create_nounce()
+            base64.b64encode(b"AddQTtkf8DIGC+s9kLxiXg==")
         )
-    print(powtoken)
-    print("b64:", base64.b64encode(powtoken))
+    # print("nounce:", base64.b64encode(create_nounce()))
+    # print("nounce:", "AddQTtkf8DIGC+s9kLxiXg==")
+    # print(powtoken)
+    print("pow(b64):", base64.b64encode(powtoken))
     assert powtoken != ''
 
 

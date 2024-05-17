@@ -2,14 +2,21 @@ from fastapi import APIRouter, HTTPException
 
 # from .modules import ip_management, block_management
 from .schemas import Block, HttpUrl
-from .service import attemp_hangging, register_ips, get_nodes
+from .service import (attemp_hangging, register_nodes, get_nodes,
+                      unregister_nodes)
 
 router = APIRouter()
 
 
 @router.post('/register')
 async def register(ips: list[HttpUrl]):
-    register_ips(ips)
+    register_nodes(ips)
+    return 1
+
+
+@router.delete('/unregister')
+async def unregister(ips: list[HttpUrl]):
+    unregister_nodes(ips)
     return 1
 
 

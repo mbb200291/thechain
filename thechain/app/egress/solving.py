@@ -5,14 +5,14 @@ import dotenv
 import base64
 
 # from ..utils import db_management
-from ..ingress.modules import block_management
+from ..utils import block_management
 from .modules import broadcasting, transections_management
 from ..config import GENESIS_BLOCK 
 
 
-def create_nounce():
-    rand = random.randint(0, 128)
-    return bytes(rand)
+def create_nounce() -> bytes:
+    rands = [random.randint(0, 255) for _ in range(16)]
+    return bytes(rands)
 
 
 def cal_md5(content: bytes):
@@ -22,7 +22,7 @@ def cal_md5(content: bytes):
 
 
 def create_pow_token(prev: str, transection: str, publickey: str,
-                     nounce: bytes = bytes(4)):
+                     nounce: bytes):
     hasher = hashlib.sha256()
     hasher.update(cal_md5(transection.encode('utf8')))
     hasher.update(cal_md5(prev.encode('utf8')))

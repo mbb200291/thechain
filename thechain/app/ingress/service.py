@@ -1,28 +1,43 @@
 import sqlite3
 
-from .modules import ip_management, block_management
+from ..utils import block_management, ip_management
 
-conn = sqlite3.connect('ip_database.sqlite')
+# conn = sqlite3.connect('ip_database.sqlite')
 
 
 def attemp_hangging(block):
     if block_management.verify(block):
         return block_management.hang_block(block)
-    return None
+    return 0
 
 
-def register_ip(ips):
-    ip_management.extend_ips(ips)
+def register_nodes(ips):
+    ip_management.IpData().extend_ips(ips)
+    return True
+
+
+def unregister_nodes(ips):
+    ip_management.IpData().remove_ips(ips)
     return True
 
 
 def get_nodes():
-    ip_management.get_ips()
+    return ip_management.IpData().get_ips()
     
-    
-def verify_message(prev_block, value) -> bool:
-    return
+
+def hang_block(block):
+    return block_management.BlockData().hang_block(
+        block['pow_token'],
+        block['predicessor'],
+        block['block_content'],
+        block['proposer_pk'],
+        block['nounce'],
+    )
 
 
-def create_db():
-    return
+# def verify_message(prev_block, value) -> bool:
+#     return
+
+
+# def create_db():
+#     return
