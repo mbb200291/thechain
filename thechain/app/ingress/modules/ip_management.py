@@ -1,6 +1,7 @@
 from ...utils.db_management import DbConnection
 from ...config import SEED_URLS
 
+
 class IpData(DbConnection):
     def create_table(self):
         cursor = self.conn.cursor()

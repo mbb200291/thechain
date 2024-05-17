@@ -114,14 +114,15 @@ def verify_block_attribute(block) -> bool:
 
 def verify_block_pow(x: bytes) -> bool:
     leading_zero = count_leading_zero(x)
+    print("leading zero:", leading_zero)
     return leading_zero >= TAU
 
 
 def verify(block) -> bool:
-    print(verify_block_pow(base64.b64decode(block['pow_token'])),  # have to smaller than tau
-        verify_block_attribute(block),  # satisafy hash rule
-        BlockData().check_block_existence(block['predicessor'])  # whether block already exist
-        )
+    # print(verify_block_pow(base64.b64decode(block['pow_token'])),  # have to smaller than tau
+    #     verify_block_attribute(block),  # satisafy hash rule
+    #     BlockData().check_block_existence(block['predicessor'])  # whether block already exist
+    #     )
     return (
         verify_block_pow(base64.b64decode(block['pow_token']))  # have to smaller than tau
         and verify_block_attribute(block)  # satisafy hash rule

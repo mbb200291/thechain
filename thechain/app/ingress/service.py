@@ -7,8 +7,8 @@ conn = sqlite3.connect('ip_database.sqlite')
 
 def attemp_hangging(block):
     if block_management.verify(block):
-        result = block_management.hang_block(block)
-    return result
+        return block_management.hang_block(block)
+    return None
 
 
 def register_ip(ips):

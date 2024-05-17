@@ -7,6 +7,7 @@ import base64
 # from ..utils import db_management
 from ..ingress.modules import block_management
 from .modules import broadcasting, transections_management
+from ..config import GENESIS_BLOCK 
 
 
 def create_nounce():
@@ -20,12 +21,12 @@ def cal_md5(content: bytes):
     return hasher.digest()
 
 
-def create_pow_token(prev: str, transection: str, privatekey: str,
+def create_pow_token(prev: str, transection: str, publickey: str,
                      nounce: bytes = bytes(4)):
     hasher = hashlib.sha256()
     hasher.update(cal_md5(transection.encode('utf8')))
     hasher.update(cal_md5(prev.encode('utf8')))
-    hasher.update(base64.b64decode(privatekey))
+    hasher.update(base64.b64decode(publickey))
     hasher.update(nounce)
     return hasher.digest()
 
@@ -36,14 +37,14 @@ def guess(cur_target):
     return create_pow_token(
         cur_target,
         lastest_transection,
-        os.getenv('privatekey'),
+        os.getenv('publickey'),
         create_nounce()
         )
 
 
 def main():
     dbm = block_management.DbConnection()
-    cur_target = 'thegenesisblock'
+    cur_target = GENESIS_BLOCK
     while True:
         temp = dbm.get_tip()
         if temp != cur_target:
