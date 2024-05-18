@@ -4,47 +4,28 @@ import hashlib
 import dotenv
 import base64
 
-# from ..utils import db_management
+# from ..utils import db_managemenbt
 from ..utils import block_management
+# from ..utils.block_management import create_pow_token, create_nounce
 from .modules import broadcasting, transections_management
 from ..config import GENESIS_BLOCK 
 
 
-def create_nounce() -> bytes:
-    rands = [random.randint(0, 255) for _ in range(16)]
-    return bytes(rands)
 
-
-def cal_md5(content: bytes):
-    hasher = hashlib.md5()
-    hasher.update(content)
-    return hasher.digest()
-
-
-def create_pow_token(prev: str, transection: str, publickey: str,
-                     nounce: bytes):
-    hasher = hashlib.sha256()
-    hasher.update(cal_md5(transection.encode('utf8')))
-    hasher.update(cal_md5(prev.encode('utf8')))
-    hasher.update(base64.b64decode(publickey))
-    hasher.update(nounce)
-    return hasher.digest()
-
-
-def guess(cur_target):
+def guess(cur_target: bytes):
     lastest_transection = transections_management.DbConnection(
         ).get_lastest_trans()
-    return create_pow_token(
+    return block_management.create_pow_token(
         cur_target,
-        lastest_transection,
-        os.getenv('publickey'),
-        create_nounce()
+        lastest_transection.encode('utf8'),
+        base64.b64decode(os.getenv('publickey').decode('ascii')),
+        block_management.create_nounce()
         )
 
 
 def main():
     dbm = block_management.DbConnection()
-    cur_target = GENESIS_BLOCK
+    cur_target = base64.b64encode(GENESIS_BLOCK.decode('utf8'))
     while True:
         temp = dbm.get_tip()
         if temp != cur_target:

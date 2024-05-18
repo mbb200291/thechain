@@ -4,9 +4,11 @@ import pytest
 import dotenv
 import base64
 
-from thechain.app.egress.solving import (
-    create_pow_token, GENESIS_BLOCK, create_nounce, 
-    )
+from thechain.app.utils.block_management import create_nounce, create_pow_token
+from thechain.app.config import GENESIS_BLOCK
+# from thechain.app.egress.solving import (
+#     GENESIS_BLOCK, create_nounce, 
+#     )
 
 
 dotenv.load_dotenv()
@@ -22,10 +24,10 @@ def test__extend_ips():
 
 def test__create_block():
     powtoken = create_pow_token(
-            GENESIS_BLOCK,
-            "test input",
-            os.getenv("PRIVATEKEY"),
-            base64.b64encode(b"AddQTtkf8DIGC+s9kLxiXg==")
+            "test input".encode('utf8'),
+            base64.b64decode(GENESIS_BLOCK.encode('ascii')),
+            base64.b64decode(os.getenv("PRIVATEKEY").encode('ascii')),
+            base64.b64decode(b"AddQTtkf8DIGC+s9kLxiXg==")
         )
     # print("nounce:", base64.b64encode(create_nounce()))
     # print("nounce:", "AddQTtkf8DIGC+s9kLxiXg==")

@@ -1,5 +1,6 @@
 import hashlib
 import base64
+import random
 
 from ..config import TAU
 from .db_management import DbConnection
@@ -17,17 +18,17 @@ class BlockData(DbConnection):
                 depth INT NOT NULL,
 
                 predicessor TEXT NULL,
-                block_content TEXT NOT NULL,
+                transactions TEXT NOT NULL,
                 proposer_pk TEXT NOT NULL,
                 nounce BLOB NOT NULL
             )
         ''')
         # pow_token TEXT NOT NULL
-        # block_content TEXT NOT NULL
+        # transactions TEXT NOT NULL
         # proposer_pk TEXT NOT NULL
         # nounce TEXT NOT NULL
 
-        cursor.execute('INSERT INTO Blocks (id, depth, predicessor, block_content, proposer_pk, nounce) VALUES (?, ?, ?, ?, ?, ?)', (
+        cursor.execute('INSERT INTO Blocks (id, depth, predicessor, transactions, proposer_pk, nounce) VALUES (?, ?, ?, ?, ?, ?)', (
                 "thegenesisblock",
                 0,
                 '',
@@ -47,15 +48,15 @@ class BlockData(DbConnection):
         return bool(data)
 
     def hang_block(
-            self, pow_token, predicessor, block_content, proposer_pk, nounce):
+            self, pow_token, predicessor, transactions, proposer_pk, nounce):
         cursor = self.conn.cursor()
 
         # append
         cursor.execute(
-            '''INSERT INTO Blocks (id, depth, predicessor, block_content, proposer_pk, nounce)
+            '''INSERT INTO Blocks (id, depth, predicessor, transactions, proposer_pk, nounce)
                VALUES (?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.id = ?), ?, ?, ?, ?);
                ''', (
-                pow_token, predicessor, predicessor, block_content, proposer_pk, nounce
+                pow_token, predicessor, predicessor, transactions, proposer_pk, nounce
                 )
             )
         self.conn.commit()
@@ -98,6 +99,31 @@ def cal_md5(content: bytes):
     return hasher.digest()
 
 
+def create_nounce() -> bytes:
+    rands = [random.randint(0, 255) for _ in range(16)]
+    return bytes(rands)
+
+
+def cal_md5(content: bytes):
+    hasher = hashlib.md5()
+    hasher.update(content)
+    return hasher.digest()
+
+
+def create_pow_token(
+        transection: bytes,#str,
+        pred: bytes,#str,
+        publickey: bytes,
+        nounce: bytes
+        ) -> bytes:
+    hasher = hashlib.sha256()
+    hasher.update(transection),#.encode('utf8'))
+    hasher.update(pred),#.encode('utf8'))
+    hasher.update(publickey),
+    hasher.update(nounce)
+    return hasher.digest()
+
+
 # def cal_sh256(content: bytes):
 #     hasher = hashlib.sha256()
 #     hasher.update(content)
@@ -105,12 +131,18 @@ def cal_md5(content: bytes):
 
 
 def verify_block_attribute(block) -> bool:
-    hasher = hashlib.sha256()
-    hasher.update(cal_md5(block['predicessor'].encode('utf8')))
-    hasher.update(cal_md5(block['block_content'].encode('utf8')))
-    hasher.update(base64.b64decode(block['proposer_pk']))
-    hasher.update(base64.b64decode(block['nounce']))
-    return hasher.digest() == base64.b64decode(block['pow_token'])
+    
+    # hasher = hashlib.sha256()
+    # hasher.update(block['predicessor'].encode('utf8'))
+    # hasher.update(block['transactions'].encode('utf8'))
+    # hasher.update()
+    # hasher.update()
+    return create_pow_token(
+        block['transactions'],
+        block['predicessor'],
+        block['proposer_pk'],
+        base64.b64decode(block['nounce'])
+    ) == base64.b64decode(block['pow_token'])
 
 
 def verify_block_pow(x: bytes) -> bool:
@@ -130,4 +162,4 @@ def verify(block) -> bool:
         )
 
 
-# pow_token, predicessor, block_content, proposer_pk, nounce
+# pow_token, predicessor, transactions, proposer_pk, nounce
