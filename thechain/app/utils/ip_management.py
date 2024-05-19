@@ -8,7 +8,7 @@ class IpData(DbConnection):
         cursor.execute('DROP TABLE IF EXISTS IPs')
         cursor.execute('''
             CREATE TABLE IPs (
-                id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ip TEXT NOT NULL
             )
         ''')

@@ -1,5 +1,8 @@
+import os
+
 from pydantic import BaseModel, HttpUrl
 
+from config import GENESIS_BLOCK
 
 # class IpList(BaseModel):
 #     ips: list[str]
@@ -19,12 +22,12 @@ class Block(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "pow_token": "ifijefjlfdjf",
-                    "transactions": "test content",
-                    "predicessor": "dfdfeijoei",
-                    "proposer_pk": "dfdfdf",
-                    "nounce": "dfmfmioief"
-                }
+                    "pow_token": "7a82hNISXLNsANBp1NsJSLy5vSUJcW4Cy7yA/KmW5iQ=",
+                    "predicessor": GENESIS_BLOCK,
+                    "transactions": "test input",
+                    "proposer_pk": os.getenv("PRIVATEKEY"),
+                    "nounce": "AddQTtkf8DIGC+s9kLxiXg==",
+                    }
             ]
         }
     }

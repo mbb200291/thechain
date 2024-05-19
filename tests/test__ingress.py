@@ -33,14 +33,17 @@ def test__get_nodes():
     assert fakeurl not in get_nodes()
 
 
-def test__attemp_hang_block():
-    assert attemp_hangging({
+testcase_block = {
         "pow_token": "7a82hNISXLNsANBp1NsJSLy5vSUJcW4Cy7yA/KmW5iQ=",
         "predicessor": GENESIS_BLOCK,
         "transactions": "test input",
         "proposer_pk": os.getenv("PRIVATEKEY"),
         "nounce": "AddQTtkf8DIGC+s9kLxiXg==",
-         }) == 1
+         }
+
+
+def test__attemp_hang_block():
+    assert attemp_hangging(testcase_block) == 1
 
 
 if __name__ == "__main__":

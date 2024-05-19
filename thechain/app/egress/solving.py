@@ -5,15 +5,16 @@ import dotenv
 import base64
 
 # from ..utils import db_managemenbt
-from ..utils import block_management
+from ..utils import block_management, transection_management
 # from ..utils.block_management import create_pow_token, create_nounce
-from .modules import broadcasting, transections_management
+from .modules import broadcasting
 from ..config import GENESIS_BLOCK 
 
 
 
-def guess(cur_target: bytes):
-    lastest_transection = transections_management.DbConnection(
+def pack_block_attemp():
+
+    transections = transection_management.DbConnection(
         ).get_lastest_trans()
     return block_management.create_pow_token(
         cur_target,
@@ -30,7 +31,11 @@ def main():
         temp = dbm.get_tip()
         if temp != cur_target:
             cur_target = temp
-        attempoutcome = guess(cur_target)
-        if block_management.verify_block_pow(attempoutcome):
-            broadcasting.broadcast()
+        powtoken = guess(cur_target)  # test create
+        if block_management.verify_block_pow(powtoken):
+            block_proposal = block_management.create_block(
+                transaction,
+                pred
+            )
+            broadcasting.broadcast(block_proposal)
             break
