@@ -8,34 +8,37 @@ import base64
 from ..utils import block_management, transection_management
 # from ..utils.block_management import create_pow_token, create_nounce
 from .modules import broadcasting
-from ..config import GENESIS_BLOCK 
+from ..config import GENESIS_BLOCK, PUBLIC_KEY 
 
 
-
-def pack_block_attemp():
-
-    transections = transection_management.DbConnection(
-        ).get_lastest_trans()
-    return block_management.create_pow_token(
-        cur_target,
-        lastest_transection.encode('utf8'),
-        base64.b64decode(os.getenv('publickey').decode('ascii')),
-        block_management.create_nounce()
-        )
-
-
-def main():
-    dbm = block_management.DbConnection()
-    cur_target = base64.b64encode(GENESIS_BLOCK.decode('utf8'))
+def pack_block_attemp() -> str:
     while True:
-        temp = dbm.get_tip()
-        if temp != cur_target:
-            cur_target = temp
-        powtoken = guess(cur_target)  # test create
-        if block_management.verify_block_pow(powtoken):
-            block_proposal = block_management.create_block(
-                transaction,
-                pred
+        pow_token = block_management.create_pow_token(
+            transection_management.DbConnection(
+                ).get_lastest_trans().encode('utf8'),
+            block_management.base64decode(transection_management.DbConnection(
+                ).get_tip()),
+            PUBLIC_KEY,
+            block_management.create_nounce()
             )
-            broadcasting.broadcast(block_proposal)
-            break
+        if block_management.verify_block_pow(pow_token):
+            return pow_token
+
+
+# def main():
+#     pow_token = pack_block_attemp()
+    
+    # dbm = block_management.DbConnection()
+    # cur_target = base64.b64encode(GENESIS_BLOCK.decode('utf8'))
+    # while True:
+    #     temp = dbm.get_tip()
+    #     if temp != cur_target:
+    #         cur_target = temp
+    #     powtoken = guess(cur_target)  # test create
+    #     if block_management.verify_block_pow(powtoken):
+    #         block_proposal = block_management.create_block(
+    #             transaction,
+    #             pred
+    #         )
+    #         broadcasting.broadcast(block_proposal)
+    #         break
