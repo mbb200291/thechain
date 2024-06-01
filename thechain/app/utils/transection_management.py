@@ -1,3 +1,5 @@
+import json
+
 from .db_management import DbConnection
 
 
@@ -19,11 +21,11 @@ class TransactionData(DbConnection):
         self.conn.commit()
         self.conn.close()
 
-    def dump_unsync_transactions(self):
+    def get_unsync_transactions(self) -> str:
         cursor = self.conn.cursor()
         cursor.execute(
             "SELECT content FROM Transections WHERE sync = false", ()
         )
         transactions = cursor.fetchall()
         self.conn.close()
-        return transactions
+        return json.dumps(transactions)

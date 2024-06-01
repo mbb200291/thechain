@@ -20,8 +20,24 @@ async def send(url, session, block):
         return 0
 
 
-async def broadcast(block):
+async def broadcast(data):
     async with aiohttp.ClientSession() as session:
         rets = await asyncio.gather(
-            *(send(url, session, block) for url in get_nodes()))
+            *(send(url, session, data) for url in get_nodes()))
     return rets
+
+
+async def broadcast_wrapper(sec: int):
+    async def _broadcast_wrapper(func):
+        async def wrapped():
+            while True:
+                time.sleep(sec)
+                payload = func()
+                rets = broadcast(payload)
+                print(rets)
+        return wrapped
+    return _broadcast_wrapper
+        
+
+# def alive():
+#     while 

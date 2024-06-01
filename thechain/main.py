@@ -4,15 +4,15 @@ import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from app.egress import solving
-from app.ingress import routers
+from thechain.app.egress import endpoints
+from thechain.app.ingress import endpoints
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """keep solving puzzles"""
     thread = threading.Thread(
-        target=solving.main)
+        target=endpoints.main)
     thread.daemon = True
     thread.start()
 
@@ -28,7 +28,7 @@ app = FastAPI(
 
 
 # accept imcomming block
-app.include_router(routers.router)
+app.include_router(endpoints.router)
 
 
 if __name__ == "__main__":

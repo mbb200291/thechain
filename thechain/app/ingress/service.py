@@ -30,6 +30,10 @@ def get_nodes():
     return ip_management.IpData().get_ips()
     
 
+def update_blocks(blocks):
+    return block_management.BlockData().update_blocks(blocks)
+    
+
 # def hang_block(block):
 #     return block_management.BlockData().hang_block(
 #         block['pow_token'],

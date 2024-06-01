@@ -33,3 +33,9 @@ async def hang_block(block: Block):
         return {"status": result}
     else:
         return {"status": "reject"}
+
+
+@router.post('syncchain')
+async def synchain(blocks: list[Block]):
+    blocks = blocks.model_dump()
+    blocks

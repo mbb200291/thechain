@@ -1,6 +1,7 @@
 import hashlib
 import base64
 import random
+import json
 
 from ..config import TAU, GENESIS_BLOCK
 from .db_management import DbConnection
@@ -68,14 +69,37 @@ class BlockData(DbConnection):
         cursor = self.conn.cursor()
         cursor.execute(
             '''
-            SELECT id FROM Blocks WHERE depth IN (SELECT MAX(depth) FROM Blocks) LIMIT 1;
+            SELECT id FROM Blocks WHERE depth = (SELECT MAX(depth) FROM Blocks) LIMIT 1;
             ''')
-        row = cursor.fetchone()
-        tip_id = row
+        tip_id = cursor.fetchone()[0]
         self.conn.close()
-        if row:
-            return tip_id
-        return None
+        return tip_id
+    
+    def dump_all_blocks(self) -> str:
+        cursor = self.conn.cursor()
+        cursor.execute(
+            '''
+            SELECT * FROM Blocks;
+            ''')
+        blocks = cursor.fetchall()
+        self.conn.close()
+        return json.dumps(blocks)
+        
+    def update_blocks(self, blocks):
+        cursor = self.conn.cursor()
+
+        # append
+        cursor.execute(
+            '''INSERT INTO Blocks (id, depth, predicessor, transactions, proposer_pk, nounce)
+               VALUES (
+                ?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.id = ?), ?, ?, ?, ?);
+               ''', (
+                pow_token, predicessor, predicessor, transactions, proposer_pk, nounce
+                )
+            )
+        self.conn.commit()
+        self.conn.close()
+        return 1
 
 
 def bytes_to_binary_string(bytes_obj):
