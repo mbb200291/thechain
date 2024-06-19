@@ -33,3 +33,13 @@ async def hang_block(block: Block):
         return {"status": result}
     else:
         return {"status": "reject"}
+
+
+@router.post('/hangblocks')
+async def hang_block(blocks: list[Block]):
+    blocks = [x.model_dump() for x in blocks]
+    results = []
+    for block in blocks:
+        result = attemp_hangging(block)
+        results.append(result)
+    return results

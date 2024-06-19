@@ -28,17 +28,17 @@ def pack_block_attemp() -> str:
 # def main():
 #     pow_token = pack_block_attemp()
     
-    # dbm = block_management.DbConnection()
-    # cur_target = base64.b64encode(GENESIS_BLOCK.decode('utf8'))
-    # while True:
-    #     temp = dbm.get_tip()
-    #     if temp != cur_target:
-    #         cur_target = temp
-    #     powtoken = guess(cur_target)  # test create
-    #     if block_management.verify_block_pow(powtoken):
-    #         block_proposal = block_management.create_block(
-    #             transaction,
-    #             pred
-    #         )
-    #         broadcasting.broadcast(block_proposal)
-    #         break
+#     dbm = block_management.DbConnection()
+#     cur_target = base64.b64encode(GENESIS_BLOCK.decode('utf8'))
+#     while True:
+#         temp = dbm.get_tip()
+#         if temp != cur_target:
+#             cur_target = temp
+#         powtoken = guess(cur_target)  # test create
+#         if block_management.verify_block_pow(powtoken):
+#             block_proposal = block_management.create_block(
+#                 transaction,
+#                 pred
+#             )
+#             broadcasting.broadcast(block_proposal)
+#             break
