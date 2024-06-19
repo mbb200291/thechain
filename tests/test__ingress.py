@@ -37,7 +37,7 @@ testcase_block = {
         "pow_token": "7a82hNISXLNsANBp1NsJSLy5vSUJcW4Cy7yA/KmW5iQ=",
         "predicessor": GENESIS_BLOCK,
         "transactions": "test input",
-        "proposer_pk": os.getenv("PRIVATEKEY"),
+        "proposer_pk": os.getenv("PUBLIC_KEY"),
         "nounce": "AddQTtkf8DIGC+s9kLxiXg==",
          }
 

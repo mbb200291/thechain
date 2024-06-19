@@ -4,15 +4,24 @@ import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from app.egress import solving
-from app.ingress import routers
+from app.egress import endpoints as ed
+from app.ingress import endpoints as ine
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def broadcasting_blocks(app: FastAPI):
     """keep solving puzzles"""
     thread = threading.Thread(
-        target=solving.main)
+        target=ed.pack_local_known_blocks)
+    thread.daemon = True
+    thread.start()
+
+
+@asynccontextmanager
+async def solving(app: FastAPI):
+    """keep solving puzzles"""
+    thread = threading.Thread(
+        target=ed.pack_block_attemp)
     thread.daemon = True
     thread.start()
 
@@ -28,7 +37,7 @@ app = FastAPI(
 
 
 # accept imcomming block
-app.include_router(routers.router)
+app.include_router(ine.router)
 
 
 if __name__ == "__main__":
