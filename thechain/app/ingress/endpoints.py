@@ -20,7 +20,7 @@ async def unregister(ips: list[HttpUrl]):
     return 1
 
 
-@router.get('/operation-nodes')
+@router.get('/nodes')
 async def get_operation_nodes() -> list[HttpUrl]:
     return get_nodes()
 

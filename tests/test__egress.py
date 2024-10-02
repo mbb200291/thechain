@@ -6,7 +6,7 @@ import base64
 
 from thechain.app.utils.block_management import create_nounce, create_pow_token
 from thechain.app.config import GENESIS_BLOCK
-from thechain.app.egress.modules.broadcasting import broadcast
+from thechain.app.egress.broadcasting import broadcast
 from thechain.app.egress.endpoints import pack_block_attemp
 
 

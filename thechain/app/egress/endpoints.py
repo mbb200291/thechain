@@ -8,7 +8,7 @@ import time
 # from ..utils import db_managemenbt
 from ..utils import block_management, transection_management
 # from ..utils.block_management import create_pow_token, create_nounce
-from .modules import broadcasting
+from . import broadcasting
 from ..config import GENESIS_BLOCK, PUBLIC_KEY 
 
 

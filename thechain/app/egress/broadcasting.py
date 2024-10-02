@@ -4,7 +4,7 @@ import time
 import aiohttp
 import requests
 
-from ...ingress.service import (
+from ..ingress.service import (
     get_nodes,
     )
 
@@ -37,7 +37,3 @@ def broadcast_wrapper(sec: int):
                 print(rets)
         return wrapped
     return _broadcast_wrapper
-        
-
-# def alive():
-#     while 
