@@ -10,4 +10,9 @@ setup(
     author_email='mbb200291@gmail.com',
     url='https://github.com/mbb200291/thechain',
     install_requires=open('thechain/requirements.txt').readlines(),
+    entry_points={
+        'console_scripts': [
+            'your-command=thechain.main:main',
+        ],
+    },
 )

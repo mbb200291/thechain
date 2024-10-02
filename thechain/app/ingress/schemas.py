@@ -2,7 +2,7 @@ import os
 
 from pydantic import BaseModel, HttpUrl
 
-from config import GENESIS_BLOCK
+# from config import GENESIS_BLOCK
 
 # class IpList(BaseModel):
 #     ips: list[str]
@@ -23,7 +23,7 @@ class Block(BaseModel):
             "examples": [
                 {
                     "pow_token": "7a82hNISXLNsANBp1NsJSLy5vSUJcW4Cy7yA/KmW5iQ=",
-                    "predicessor": GENESIS_BLOCK,
+                    "predicessor": "thegenesisblock=",
                     "transactions": "test input",
                     "proposer_pk": os.getenv("PUBLIC_KEY"),
                     "nounce": "AddQTtkf8DIGC+s9kLxiXg==",

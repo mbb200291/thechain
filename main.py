@@ -4,21 +4,21 @@ import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from thechain.app.egress import endpoints
-from thechain.app.ingress import endpoints
+import thechain.app.egress.endpoints as ege
+import thechain.app.ingress.endpoints as ige
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """keep solving puzzles"""
     thread = threading.Thread(
-        target=endpoints.main)
+        target=ege.router)
     thread.daemon = True
     thread.start()
 
 
 app = FastAPI(
-    # lifespan=lifespan,
+    lifespan=lifespan,
     redoc_url=None,
     docs_url="/docs",
     title='Ingress of Node',
@@ -28,7 +28,7 @@ app = FastAPI(
 
 
 # accept imcomming block
-app.include_router(endpoints.router)
+app.include_router(ige.router)
 
 
 if __name__ == "__main__":

@@ -27,9 +27,9 @@ async def broadcast(data):
     return rets
 
 
-async def broadcast_wrapper(sec: int):
-    async def _broadcast_wrapper(func):
-        async def wrapped():
+def broadcast_wrapper(sec: int):
+    def _broadcast_wrapper(func):
+        def wrapped():
             while True:
                 time.sleep(sec)
                 payload = func()
