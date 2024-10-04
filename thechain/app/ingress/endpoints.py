@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from typing import Optional
 
 from ..utils import block_management
 from .schemas import Block, HttpUrl
@@ -28,9 +29,9 @@ async def get_operation_nodes() -> list[HttpUrl]:
 @router.post('/hangblock')
 async def hang_block(block: Block):
     block = block.model_dump()
-    result = attemp_hangging(block)
-    if result:
-        return {"status": result}
+    result = attemp_hangging([block])
+    if result[0]:
+        return {"status": 1}
     else:
         return {"status": "reject"}
 
@@ -38,10 +39,17 @@ async def hang_block(block: Block):
 @router.post('/syncchain')
 async def synchain(blocks: list[Block]):
     blocks = blocks.model_dump()
-    blocks
+    return attemp_hangging(blocks)
 
 
-@router.post('/create_block')
-async def create_block() -> Block:
-    block = block_management.create_block()
+@router.get('/blocks')
+async def get_blocks() -> list[Block]:
+    blocks = block_management.BlockData().dump_all_blocks()
+    return blocks
+
+
+@router.post('/block/testcreate')
+async def create_block(predicessor: Optional[str] = None,
+                       transactions: Optional[str] = None) -> Block:
+    block = block_management.create_block(predicessor, transactions)
     return block

@@ -19,7 +19,7 @@ def pack_block_attemp() -> dict[str, str]:
         time.sleep(0.3)
         print("> round: %s" %round)
         block = block_management.create_block()
-        if block_management.verify_block_pow(pow_token):
+        if block_management.verify_block_pow(block['pow_token']):
             return block
         round += 1
 
