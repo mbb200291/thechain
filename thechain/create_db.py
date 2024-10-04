@@ -1,12 +1,12 @@
-import sys
-import pathlib
-import os
+# import sys
+# import pathlib
+# import os
 
-sys.path.append((pathlib.Path(__file__).parent.parent).as_posix())
+# sys.path.append((pathlib.Path(__file__).parent.parent).as_posix())
 
 from app.utils.block_management import BlockData
 from app.utils.ip_management import IpData
-from thechain.app.utils.transection_management import TransactionData
+from app.utils.transection_management import TransactionData
 
 
 def main():

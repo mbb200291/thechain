@@ -22,11 +22,11 @@ class Block(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "pow_token": "7a82hNISXLNsANBp1NsJSLy5vSUJcW4Cy7yA/KmW5iQ=",
-                    "predicessor": "thegenesisblock=",
+                    "pow_token": "7a82hNISXLNsANBp1NsJSLy5vSUJcW4Cy7yA/KmW5iQ",
+                    "predicessor": "thegenesisblock",
                     "transactions": "test input",
                     "proposer_pk": os.getenv("PUBLIC_KEY"),
-                    "nounce": "AddQTtkf8DIGC+s9kLxiXg==",
+                    "nounce": "AddQTtkf8DIGC+s9kLxiXg",
                 }
             ]
         }

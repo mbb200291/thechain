@@ -5,7 +5,7 @@ import json
 
 from ..config import TAU, GENESIS_BLOCK
 from .db_management import DbConnection
-
+from .transection_managment import TransactionData
 
 class BlockData(DbConnection):
     def create_table(self):
@@ -118,12 +118,14 @@ def count_leading_zero(token: bytes) -> int:
     return count
 
 
-def base64decode(string: str) -> bytes:
-    return base64.b64decode(string.encode('utf8'))
+def bytes_encode(string: str) -> bytes:
+    # return base64.b64decode(string.encode('utf8'))  # base64-wise
+    return string.encode('utf8')  # base64-wise
 
 
-def base64encode(bytes_obj: bytes) -> str:
-    return base64.b64encode(bytes).decode('ascii')
+def bytes_decode(bytes_obj: bytes) -> str:
+    # return base64.b64encode(bytes).decode('ascii')  # base64-eise
+    return bytes_obj.decode('utf8')
 
 
 def cal_md5(content: bytes):
@@ -157,20 +159,36 @@ def create_pow_token(
     return hasher.digest()
 
 
-def create_block(
-        powtoken: str,
-        transactions: str,
-        predicessor: str,
-        proposer_pk: str,
-        nounce: str):
-    return {
-        'powtoken': powtoken,
-        'transactions': transactions,
-        'predicessor': predicessor,
-        'proposer_pk': proposer_pk,
-        'nounce': nounce}
+# def create_block(
+#         powtoken: str,
+#         transactions: str,
+#         predicessor: str,
+#         proposer_pk: str,
+#         nounce: str):
+#     return {
+#         'powtoken': powtoken,
+#         'transactions': transactions,
+#         'predicessor': predicessor,
+#         'proposer_pk': proposer_pk,
+#         'nounce': nounce}
 
-
+def create_block():
+    block = {
+            "nounce": create_nounce(),
+            "predicessor": lock_management.bytes_encode(
+                BlockData().get_tip()),
+            "proposer_pk": PUBLIC_KEY_BYTES,
+            "transactions": TransactionData(
+                ).get_unsync_transactions().encode('utf8'),
+            }
+        pow_token = create_pow_token(
+            block["transactions"],
+            block["predicessor"],
+            block["proposer_pk"],
+            block["nounce"],
+            )
+        block["pow_token"] = pow_token
+    return block
 # def cal_sh256(content: bytes):
 #     hasher = hashlib.sha256()
 #     hasher.update(content)
@@ -178,17 +196,11 @@ def create_block(
 
 
 def verify_block_attribute(block) -> bool:
-    
-    # hasher = hashlib.sha256()
-    # hasher.update(block['predicessor'].encode('utf8'))
-    # hasher.update(block['transactions'].encode('utf8'))
-    # hasher.update()
-    # hasher.update()
     return create_pow_token(
-        block['transactions'].encode('utf8'),
-        base64decode(block['predicessor']),
-        base64decode(block['proposer_pk']),
-        base64decode(block['nounce'])
+        bytes_encode(block['transactions'].encode('utf8')),
+        bytes_encode(block['predicessor']),
+        bytes_encode(block['proposer_pk']),
+        bytes_encode(block['nounce'])
     ) == base64.b64decode(block['pow_token'])
 
 
@@ -199,11 +211,11 @@ def verify_block_pow(x: bytes) -> bool:
 
 
 def verify(block) -> bool:
-    # print('>1', verify_block_pow(base64decode(block['pow_token'])))
-    # print('>2', verify_block_attribute(block))
-    # print('>3', BlockData().check_block_existence(block['predicessor']))
+    print('>1', verify_block_pow(bytes_encode(block['pow_token'])))
+    print('>2', verify_block_attribute(block))
+    print('>3', BlockData().check_block_existence(block['predicessor']))
     return (
-        verify_block_pow(base64decode(block['pow_token']))  # have to smaller than tau
+        verify_block_pow(bytes_encode(block['pow_token']))  # have to smaller than tau
         and verify_block_attribute(block)  # satisafy hash rule
         and BlockData().check_block_existence(block['predicessor'])  # whether block already exist
         )

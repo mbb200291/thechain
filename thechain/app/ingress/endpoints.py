@@ -39,3 +39,10 @@ async def hang_block(block: Block):
 async def synchain(blocks: list[Block]):
     blocks = blocks.model_dump()
     blocks
+
+
+@router.post('create_block')
+async def create_block(input: str):
+    block = block_management.create_block()
+    block["transactions"] = input
+    return blocks

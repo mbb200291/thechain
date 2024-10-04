@@ -12,22 +12,17 @@ from . import broadcasting
 from ..config import GENESIS_BLOCK, PUBLIC_KEY 
 
 
+PUBLIC_KEY_BYTES = block_management.bytes_encode(PUBLIC_KEY)
+
 @broadcasting.broadcast_wrapper(10)
-def pack_block_attemp() -> str:
+def pack_block_attemp() -> dict[str, str]:
     round = 1
     while True:
         time.sleep(0.3)
         print("> round: %s" %round)
-        pow_token = block_management.create_pow_token(
-            transection_management.TransactionData(
-                ).get_unsync_transactions().encode('utf8'),
-            block_management.base64decode(
-                block_management.BlockData().get_tip()),
-            PUBLIC_KEY,
-            block_management.create_nounce()
-            )
+        block = block_management.create_block()
         if block_management.verify_block_pow(pow_token):
-            return pow_token
+            return block
         round += 1
 
 
@@ -36,6 +31,6 @@ def pack_local_known_blocks():
     block_management.BlockData().get_all_blocks()
 
 
-async def router():
-    await pack_block_attemp()
-    await pack_local_known_blocks()
+# async def router():
+#     await pack_block_attemp()
+#     await pack_local_known_blocks()
