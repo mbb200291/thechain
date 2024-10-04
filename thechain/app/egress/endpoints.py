@@ -6,13 +6,11 @@
 import time
 
 # from ..utils import db_managemenbt
-from ..utils import block_management, transection_management
+from ..utils import block_management, transaction_management
 # from ..utils.block_management import create_pow_token, create_nounce
 from . import broadcasting
 from ..config import GENESIS_BLOCK, PUBLIC_KEY 
 
-
-PUBLIC_KEY_BYTES = block_management.bytes_encode(PUBLIC_KEY)
 
 @broadcasting.broadcast_wrapper(10)
 def pack_block_attemp() -> dict[str, str]:

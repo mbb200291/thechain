@@ -3,9 +3,13 @@ import base64
 import random
 import json
 
-from ..config import TAU, GENESIS_BLOCK
+from ..config import TAU, GENESIS_BLOCK, PUBLIC_KEY
 from .db_management import DbConnection
-from .transection_managment import TransactionData
+from .transaction_management import TransactionData
+
+
+PUBLIC_KEY_BYTES = "" 
+
 
 class BlockData(DbConnection):
     def create_table(self):
@@ -119,13 +123,13 @@ def count_leading_zero(token: bytes) -> int:
 
 
 def bytes_encode(string: str) -> bytes:
-    # return base64.b64decode(string.encode('utf8'))  # base64-wise
-    return string.encode('utf8')  # base64-wise
+    return base64.b64decode(string.encode('utf8'))  # base64-wise
+    # return string.encode('utf8')  # base64-wise
 
 
 def bytes_decode(bytes_obj: bytes) -> str:
-    # return base64.b64encode(bytes).decode('ascii')  # base64-eise
-    return bytes_obj.decode('utf8')
+    return base64.b64encode(bytes_obj).decode('ascii')  # base64-eise
+    # return bytes_obj.decode('utf8')
 
 
 def cal_md5(content: bytes):
@@ -146,13 +150,13 @@ def cal_md5(content: bytes):
 
 
 def create_pow_token(
-        transection: bytes,#str,
+        transaction: bytes,#str,
         pred: bytes,#str,
         publickey: bytes,
         nounce: bytes
         ) -> bytes:
     hasher = hashlib.sha256()
-    hasher.update(transection),#.encode('utf8'))
+    hasher.update(transaction),#.encode('utf8'))
     hasher.update(pred),#.encode('utf8'))
     hasher.update(publickey),
     hasher.update(nounce)
@@ -173,35 +177,42 @@ def create_pow_token(
 #         'nounce': nounce}
 
 def create_block():
+    # global PUBLIC_KEY_BYTES
+    # if PUBLIC_KEY_BYTES == "":
+    #    PUBLIC_KEY_BYTES = bytes_encode(PUBLIC_KEY)
     block = {
-            "nounce": create_nounce(),
-            "predicessor": lock_management.bytes_encode(
-                BlockData().get_tip()),
-            "proposer_pk": PUBLIC_KEY_BYTES,
+            "nounce": bytes_decode(create_nounce()),
+            "predicessor": BlockData().get_tip(),
+            "proposer_pk": PUBLIC_KEY,
             "transactions": TransactionData(
-                ).get_unsync_transactions().encode('utf8'),
+                ).get_unsync_transactions(),
             }
-        pow_token = create_pow_token(
-            block["transactions"],
-            block["predicessor"],
-            block["proposer_pk"],
-            block["nounce"],
-            )
-        block["pow_token"] = pow_token
+    block["pow_token"] = bytes_decode(create_pow_token(
+        bytes_encode(block["transactions"]),
+        bytes_encode(block["predicessor"]),
+        bytes_encode(block["proposer_pk"]),
+        bytes_encode(block["nounce"]),
+    ))
     return block
 # def cal_sh256(content: bytes):
 #     hasher = hashlib.sha256()
 #     hasher.update(content)
 #     return hasher.digest()
 
+    # pow_token: str  # base64 encoded of sha256([md5(transactions, 128bits, 16bytes)] | predicessor pow_token, 256bits, 32bytes) | proposer_pk (depends on algorithm)) | nounce (128, 16bytes)]) """
+    # transactions: str  # transaction string encoded in UTF8
+    # predicessor: str  # pow_token of predicessor
+    # proposer_pk: str  # public key (PEM format) (base64 encoded)
+    # nounce: str  # nounce bytes (base64 encoded)
+    
 
 def verify_block_attribute(block) -> bool:
     return create_pow_token(
-        bytes_encode(block['transactions'].encode('utf8')),
+        bytes_encode(block['transactions']),
         bytes_encode(block['predicessor']),
         bytes_encode(block['proposer_pk']),
         bytes_encode(block['nounce'])
-    ) == base64.b64decode(block['pow_token'])
+    ) == bytes_encode(block['pow_token'])
 
 
 def verify_block_pow(x: bytes) -> bool:

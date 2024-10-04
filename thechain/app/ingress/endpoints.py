@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-# from .modules import ip_management, block_management
+from ..utils import block_management
 from .schemas import Block, HttpUrl
 from .service import (attemp_hangging, register_nodes, get_nodes,
                       unregister_nodes)
@@ -35,14 +35,13 @@ async def hang_block(block: Block):
         return {"status": "reject"}
 
 
-@router.post('syncchain')
+@router.post('/syncchain')
 async def synchain(blocks: list[Block]):
     blocks = blocks.model_dump()
     blocks
 
 
-@router.post('create_block')
-async def create_block(input: str):
+@router.post('/create_block')
+async def create_block() -> Block:
     block = block_management.create_block()
-    block["transactions"] = input
-    return blocks
+    return block
