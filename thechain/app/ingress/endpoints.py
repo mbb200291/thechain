@@ -36,7 +36,7 @@ async def hang_block(block: Block):
         return {"status": "reject"}
 
 
-@router.post('/syncchain')
+@router.post('/hangblocks')
 async def synchain(blocks: list[Block]):
     blocks = blocks.model_dump()
     return attemp_hangging(blocks)

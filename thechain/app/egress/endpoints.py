@@ -27,8 +27,3 @@ def pack_block_attemp() -> dict[str, str]:
 @broadcasting.broadcast_wrapper(10)
 def pack_local_known_blocks():
     block_management.BlockData().get_all_blocks()
-
-
-# async def router():
-#     await pack_block_attemp()
-#     await pack_local_known_blocks()
