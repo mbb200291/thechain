@@ -53,3 +53,8 @@ async def create_block(predicessor: Optional[str] = None,
                        transactions: Optional[str] = None) -> Block:
     block = block_management.create_block(predicessor, transactions)
     return block
+
+
+@router.post('/testconn')
+async def testconn():
+    return 1

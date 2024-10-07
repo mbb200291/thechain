@@ -33,7 +33,7 @@ def unregister_nodes(ips):
 
 
 def get_nodes():
-    return ip_management.IpData().get_ips()
+    return [x+":7573" for x in ip_management.IpData().get_ips()]
     
 
 def update_blocks(blocks):
