@@ -19,13 +19,12 @@ class BlockData(DbConnection):
 
         cursor.execute('''
             CREATE TABLE Blocks (
-                id TEXT PRIMARY KEY,
-                depth INT NOT NULL,
-
+                pow_token TEXT PRIMARY KEY,
                 predicessor TEXT NULL,
                 transactions TEXT NOT NULL,
                 proposer_pk TEXT NOT NULL,
-                nounce BLOB NOT NULL
+                nounce BLOB NOT NULL,
+                depth INT NOT NULL
             )
         ''')
         # pow_token TEXT NOT NULL
@@ -33,7 +32,7 @@ class BlockData(DbConnection):
         # proposer_pk TEXT NOT NULL
         # nounce TEXT NOT NULL
 
-        cursor.execute('INSERT INTO Blocks (id, depth, predicessor, transactions, proposer_pk, nounce) VALUES (?, ?, ?, ?, ?, ?)', (
+        cursor.execute('INSERT INTO Blocks (pow_token, depth, predicessor, transactions, proposer_pk, nounce) VALUES (?, ?, ?, ?, ?, ?)', (
                 GENESIS_BLOCK,
                 0,
                 '',
@@ -48,7 +47,7 @@ class BlockData(DbConnection):
     def check_block_existence(self, pow_token):
         # print('predicessor token:', pow_token)
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM `Blocks` WHERE id = ?", (pow_token,))
+        cursor.execute("SELECT * FROM `Blocks` WHERE pow_token = ?", (pow_token,))
         data = cursor.fetchone()
         return bool(data)
 
@@ -58,9 +57,9 @@ class BlockData(DbConnection):
 
         # append
         cursor.execute(
-            '''INSERT INTO Blocks (id, depth, predicessor, transactions, proposer_pk, nounce)
+            '''INSERT INTO Blocks (pow_token, depth, predicessor, transactions, proposer_pk, nounce)
                VALUES (
-                ?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.id = ?), ?, ?, ?, ?);
+                ?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.pow_token = ?), ?, ?, ?, ?);
                ''', (
                 pow_token, predicessor, predicessor, transactions, proposer_pk, nounce
                 )
@@ -73,13 +72,13 @@ class BlockData(DbConnection):
         cursor = self.conn.cursor()
         cursor.execute(
             '''
-            SELECT id FROM Blocks WHERE depth = (SELECT MAX(depth) FROM Blocks) LIMIT 1;
+            SELECT pow_token FROM Blocks WHERE depth = (SELECT MAX(depth) FROM Blocks) LIMIT 1;
             ''')
-        tip_id = cursor.fetchone()[0]
+        tip_pow_token = cursor.fetchone()[0]
         self.conn.close()
-        return tip_id
+        return tip_pow_token
     
-    def dump_all_blocks(self) -> str:
+    def dump_all_blocks(self):
         cursor = self.conn.cursor()
         cursor.execute(
             '''
@@ -87,16 +86,19 @@ class BlockData(DbConnection):
             ''')
         blocks = cursor.fetchall()
         self.conn.close()
-        return json.dumps(blocks)
+        print(blocks)
+        columns = [col[0] for col in cursor.description]
+        return [dict(zip(columns, b)) for b in blocks]
+        # return json.dumps(blocks)
         
     def update_blocks(self, blocks):
         cursor = self.conn.cursor()
 
         # append
         cursor.execute(
-            '''INSERT INTO Blocks (id, depth, predicessor, transactions, proposer_pk, nounce)
+            '''INSERT INTO Blocks (pow_token, depth, predicessor, transactions, proposer_pk, nounce)
                VALUES (
-                ?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.id = ?), ?, ?, ?, ?);
+                ?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.pow_token = ?), ?, ?, ?, ?);
                ''', (
                 pow_token, predicessor, predicessor, transactions, proposer_pk, nounce
                 )
@@ -163,29 +165,17 @@ def create_pow_token(
     return hasher.digest()
 
 
-# def create_block(
-#         powtoken: str,
-#         transactions: str,
-#         predicessor: str,
-#         proposer_pk: str,
-#         nounce: str):
-#     return {
-#         'powtoken': powtoken,
-#         'transactions': transactions,
-#         'predicessor': predicessor,
-#         'proposer_pk': proposer_pk,
-#         'nounce': nounce}
-
-def create_block():
-    # global PUBLIC_KEY_BYTES
-    # if PUBLIC_KEY_BYTES == "":
-    #    PUBLIC_KEY_BYTES = bytes_encode(PUBLIC_KEY)
+def create_block(
+    predicessor=None,
+    transactions=None,
+):
+    transactions = TransactionData().get_unsync_transactions() if transactions is None else transactions
+    predicessor = BlockData().get_tip() if predicessor is None else predicessor
     block = {
             "nounce": bytes_decode(create_nounce()),
-            "predicessor": BlockData().get_tip(),
+            "predicessor": predicessor,
             "proposer_pk": PUBLIC_KEY,
-            "transactions": TransactionData(
-                ).get_unsync_transactions(),
+            "transactions": transactions,
             }
     block["pow_token"] = bytes_decode(create_pow_token(
         bytes_encode(block["transactions"]),
@@ -194,17 +184,7 @@ def create_block():
         bytes_encode(block["nounce"]),
     ))
     return block
-# def cal_sh256(content: bytes):
-#     hasher = hashlib.sha256()
-#     hasher.update(content)
-#     return hasher.digest()
 
-    # pow_token: str  # base64 encoded of sha256([md5(transactions, 128bits, 16bytes)] | predicessor pow_token, 256bits, 32bytes) | proposer_pk (depends on algorithm)) | nounce (128, 16bytes)]) """
-    # transactions: str  # transaction string encoded in UTF8
-    # predicessor: str  # pow_token of predicessor
-    # proposer_pk: str  # public key (PEM format) (base64 encoded)
-    # nounce: str  # nounce bytes (base64 encoded)
-    
 
 def verify_block_attribute(block) -> bool:
     return create_pow_token(
@@ -230,6 +210,3 @@ def verify(block) -> bool:
         and verify_block_attribute(block)  # satisafy hash rule
         and BlockData().check_block_existence(block['predicessor'])  # whether block already exist
         )
-
-
-# pow_token, predicessor, transactions, proposer_pk, nounce
