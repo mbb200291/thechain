@@ -2,23 +2,23 @@ from fastapi import APIRouter, HTTPException
 from typing import Optional
 
 from ..utils import block_management
-from .schemas import Block, HttpUrl
+from .schemas import Block, HttpUrl, Transaction
 from .service import (attemp_hangging, register_nodes, get_nodes,
                       unregister_nodes)
 
 router = APIRouter()
 
 
-@router.post('/register')
+@router.post('/node/register')
 async def register(ips: list[HttpUrl]):
     register_nodes(ips)
     return 1
 
 
-@router.delete('/unregister')
+@router.delete('/node/unregister')
 async def unregister(ips: list[HttpUrl]):
-    unregister_nodes(ips)
-    return 1
+    outcome = unregister_nodes(ips)
+    return outcome
 
 
 @router.get('/nodes')
@@ -57,4 +57,9 @@ async def create_block(predicessor: Optional[str] = None,
 
 @router.post('/testconn')
 async def testconn():
+    return 1
+
+
+@router.post('/transaction')
+async def insert_transaction(transactions: list[Transaction]):
     return 1

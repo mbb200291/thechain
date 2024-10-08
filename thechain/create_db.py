@@ -7,12 +7,14 @@
 from app.utils.block_management import BlockData
 from app.utils.ip_management import IpData
 from app.utils.transaction_management import TransactionData
+# from app.utils.ledger_management import LedgerData
 
 
 def main():
     BlockData().create_table()
     IpData().create_table()
     TransactionData().create_table()
+    # LedgerData().create_table()
 
 
 if __name__ == '__main__':
