@@ -4,12 +4,13 @@ import random
 import json
 
 from ..config import TAU, GENESIS_BLOCK, PUBLIC_KEY
+from .custlog import setup_logger
 from .db_management import DbConnection
 from .transaction_management import TransactionData
 
 
 PUBLIC_KEY_BYTES = "" 
-
+logger = setup_logger(__name__)
 
 class BlockData(DbConnection):
     def create_table(self):
@@ -45,7 +46,6 @@ class BlockData(DbConnection):
         self.conn.close()
 
     def check_block_existence(self, pow_token):
-        # print('predicessor token:', pow_token)
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM `Blocks` WHERE pow_token = ?", (pow_token,))
         data = cursor.fetchone()
@@ -86,26 +86,28 @@ class BlockData(DbConnection):
             ''')
         blocks = cursor.fetchall()
         self.conn.close()
-        print(blocks)
+        logger.debug(blocks)
         columns = [col[0] for col in cursor.description]
         return [dict(zip(columns, b)) for b in blocks]
         # return json.dumps(blocks)
         
-    def update_blocks(self, blocks):
-        cursor = self.conn.cursor()
+    # def update_blocks(self, blocks: dict[str]):
+    #     cursor = self.conn.cursor()
 
-        # append
-        cursor.execute(
-            '''INSERT INTO Blocks (pow_token, depth, predicessor, transactions, proposer_pk, nounce)
-               VALUES (
-                ?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.pow_token = ?), ?, ?, ?, ?);
-               ''', (
-                pow_token, predicessor, predicessor, transactions, proposer_pk, nounce
-                )
-            )
-        self.conn.commit()
-        self.conn.close()
-        return 1
+    #     # append
+    #         # cursor.executemany("UPDATE employees SET salary = ? WHERE id = ?", updates)
+    #     cursor.executemany(
+    #         '''INSERT INTO Blocks (pow_token, depth, predicessor, transactions, proposer_pk, nounce)
+    #            VALUES (
+    #             ?, (SELECT (b.depth + 1) FROM Blocks as b WHERE b.pow_token = ?), ?, ?, ?, ?);
+    #            ''', (
+    #             [(block["pow_token"], block['pow_token'], block[''],
+    #               transactions, proposer_pk, nounce) for block in blocks]
+    #             )
+    #         )
+    #     self.conn.commit()
+    #     self.conn.close()
+    #     return 1
 
 
 def bytes_to_binary_string(bytes_obj):
@@ -114,7 +116,7 @@ def bytes_to_binary_string(bytes_obj):
 
 def count_leading_zero(token: bytes) -> int:
     token_str = bytes_to_binary_string(token)
-    print('bins:', token_str)
+    logger.debug('bins:', token_str)
     count = 0
     for i in token_str:
         if i == '0':
@@ -197,14 +199,14 @@ def verify_block_attribute(block) -> bool:
 
 def verify_block_pow(x: bytes) -> bool:
     leading_zero = count_leading_zero(x)
-    print("leading zero:", leading_zero)
+    logger.debug("leading zero:", leading_zero)
     return leading_zero >= TAU
 
 
 def verify(block) -> bool:
-    print('>1', verify_block_pow(bytes_encode(block['pow_token'])))
-    print('>2', verify_block_attribute(block))
-    print('>3', BlockData().check_block_existence(block['predicessor']))
+    logger.debug('>1', verify_block_pow(bytes_encode(block['pow_token'])))
+    logger.debug('>2', verify_block_attribute(block))
+    logger.debug('>3', BlockData().check_block_existence(block['predicessor']))
     return (
         verify_block_pow(bytes_encode(block['pow_token']))  # have to smaller than tau
         and verify_block_attribute(block)  # satisafy hash rule

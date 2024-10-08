@@ -26,8 +26,6 @@ class IpData(DbConnection):
         cursor = self.conn.cursor()
         cursor.execute('SELECT `ip` FROM `IPs`')
         rows = cursor.fetchall()
-        for row in rows:
-            print(row)
         self.conn.close()
         return [x[0] for x in rows]
 

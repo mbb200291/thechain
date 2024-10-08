@@ -1,22 +1,25 @@
 import asyncio
 import time
+from functools import wraps
 
 import aiohttp
 # import requests
 
+from ..utils.custlog import setup_logger
 from ..ingress.service import (
     get_nodes,
     )
 
+logger = setup_logger(__name__)
 
 async def send(url, path, session, block):
     try:
-        async with session.post(url=f'{url}/{path}', data=block) as response:
+        async with session.post(url=f'{url}/{path}', json=block) as response:
             resp = await response.read()
-            print("Successfully got url {} with resp of length {}.".format(url, len(resp)))
+            logger.info("Successfully got url {} with resp of length {}.".format(url, len(resp)))
             return 1
     except Exception as e:
-        print("Unable to get url {} due to {}.".format(url, e.__class__))
+        logger.error(f"Unable to get url {url}", exc_info=True)
         return 0
 
 
@@ -29,11 +32,12 @@ async def broadcast(data, path):
 
 def broadcast_wrapper(sec: int, path: str):
     def _broadcast_wrapper(func):
-        def wrapped():
+        @wraps(func)
+        async def wrapped(*args, **kargs):
             while True:
+                payload = await func(*args, **kargs)
+                rets = await broadcast(payload, path)
+                logger.info(rets)
                 time.sleep(sec)
-                payload = func()
-                rets = broadcast(payload, path)
-                print(rets)
         return wrapped
     return _broadcast_wrapper

@@ -1,9 +1,12 @@
-import threading
+import asyncio
 
 from app.egress import endpoints as ed
 
+async def main():
+    await ed.pack_block_attemp()
+    # await ed.pack_local_known_blocks()
+    # await ed.test_broadcast()
+
 
 if __name__ == "__main__":
-    # ed.pack_block_attemp()
-    # ed.pack_local_known_block
-    ed.test_broadcast()
+    asyncio.run(main())
