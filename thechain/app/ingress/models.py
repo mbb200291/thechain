@@ -1,8 +1,8 @@
 # from pydantic import BaseModel, HttpUrl
 
 
-# class IPs(BaseModel):
-#     ip: list[HttpUrl]
+# class Urls(BaseModel):
+#     url: list[HttpUrl]
 
 
 # class Block(BaseModel):

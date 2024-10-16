@@ -10,8 +10,8 @@ router = APIRouter()
 
 
 @router.post('/node/register')
-async def register(ips: list[HttpUrl]):
-    register_nodes(ips)
+async def register(urls: list[HttpUrl]):
+    register_nodes(urls)
     return 1
 
 

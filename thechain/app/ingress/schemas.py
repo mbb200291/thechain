@@ -4,11 +4,9 @@ from pydantic import BaseModel, HttpUrl
 
 # from config import GENESIS_BLOCK
 
-# class IpList(BaseModel):
-#     ips: list[str]
+# class UrlList(BaseModel):
+#     urls: list[str]
 
-# class IPs(BaseModel):
-#     ip: list[HttpUrl]
 class Transaction(BaseModel):
     content: str
     model_config = {

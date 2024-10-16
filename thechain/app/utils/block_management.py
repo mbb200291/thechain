@@ -13,13 +13,15 @@ PUBLIC_KEY_BYTES = ""
 logger = setup_logger(__name__)
 
 class BlockData(DbConnection):
+    TABNAME = "Blocks"
+
     def create_table(self):
         cursor = self.conn.cursor()
 
-        cursor.execute('DROP TABLE IF EXISTS Blocks')
+        cursor.execute(f'DROP TABLE IF EXISTS {self.TABNAME}')
 
-        cursor.execute('''
-            CREATE TABLE Blocks (
+        cursor.execute(f'''
+            CREATE TABLE {self.TABNAME} (
                 pow_token TEXT PRIMARY KEY,
                 predicessor TEXT NULL,
                 transactions TEXT NOT NULL,
@@ -28,10 +30,6 @@ class BlockData(DbConnection):
                 depth INT NOT NULL
             )
         ''')
-        # pow_token TEXT NOT NULL
-        # transactions TEXT NOT NULL
-        # proposer_pk TEXT NOT NULL
-        # nounce TEXT NOT NULL
 
         cursor.execute('INSERT INTO Blocks (pow_token, depth, predicessor, transactions, proposer_pk, nounce) VALUES (?, ?, ?, ?, ?, ?)', (
                 GENESIS_BLOCK,
@@ -44,6 +42,7 @@ class BlockData(DbConnection):
 
         self.conn.commit()
         self.conn.close()
+        # return self
 
     def check_block_existence(self, pow_token):
         cursor = self.conn.cursor()
@@ -109,7 +108,7 @@ class BlockData(DbConnection):
     #     self.conn.close()
     #     return 1
 
-
+    
 def bytes_to_binary_string(bytes_obj):
     return ''.join(format(byte, '08b') for byte in bytes_obj)
 
