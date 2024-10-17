@@ -1,5 +1,7 @@
 import json
 
+import sqlite3
+
 from .db_management import DbConnection
 
 
@@ -17,6 +19,7 @@ class TransactionData(DbConnection):
                 content TEXT NOT NULL,
                 datetime Datetime NOT NULL,
                 sync BOOLEAN
+                apply BOOLEAN
             )
         ''')
 
@@ -42,19 +45,20 @@ class TransactionData(DbConnection):
             if table in excluded_tables:
                 continue
             
-            # create triggers insertion ops
+           # create triggers insertion ops
             create_insert_trigger = f"""
             CREATE TRIGGER IF NOT EXISTS after_insert_{table}
             AFTER INSERT ON {table}
             BEGIN
-                INSERT INTO Transactions (content, datetime)
+                INSERT INTO Transactions (content, datetime, sync, apply)
                 VALUES (
                     json_object(
-                        'operation', 'INSERT',
-                        'table', '{table}',
-                        'details', json_object({', '.join([f"'{col}', NEW.{col}" for col in self.get_columns(cursor, table)] )})
+                        'sql', 'INSERT INTO {table} ({', '.join([col for col in self.get_columns(cursor, table)])}) VALUES ({', '.join(['?' for _ in self.get_columns(cursor, table)])})',
+                        'parameters', json_array({', '.join([f"NEW.{col}" for col in self.get_columns(cursor, table)])})
                     ), 
-                    CURRENT_TIMESTAMP
+                    CURRENT_TIMESTAMP,
+                    false,
+                    false
                 );
             END;
             """
@@ -64,16 +68,17 @@ class TransactionData(DbConnection):
             CREATE TRIGGER IF NOT EXISTS after_update_{table}
             AFTER UPDATE ON {table}
             BEGIN
-                INSERT INTO Transactions (content, datetime)
+                INSERT INTO Transactions (content, datetime, sync, apply)
                 VALUES (
                     json_object(
-                        'operation', 'UPDATE',
-                        'table', '{table}',
-                        'details', json_object(
-                            {', '.join([f"'old_{col}', OLD.{col}, 'new_{col}', NEW.{col}" for col in self.get_columns(cursor, table)])}
-                        ), 
-                    CURRENT_TIMESTAMP
-                    )
+                        'sql', 'UPDATE {table} SET {', '.join([f"{col} = ?" for col in self.get_columns(cursor, table)])} WHERE id = ?',
+                        'parameters', json_array(
+                            {', '.join([f"NEW.{col}" for col in self.get_columns(cursor, table)])}, OLD.id
+                        )
+                    ),
+                    CURRENT_TIMESTAMP,
+                    false,
+                    false
                 );
             END;
             """
@@ -83,14 +88,15 @@ class TransactionData(DbConnection):
             CREATE TRIGGER IF NOT EXISTS after_delete_{table}
             AFTER DELETE ON {table}
             BEGIN
-                INSERT INTO Transactions (content, datetime)
+                INSERT INTO Transactions (content, datetime, sync, apply)
                 VALUES (
                     json_object(
-                        'operation', 'DELETE',
-                        'table', '{table}',
-                        'details', json_object({', '.join([f"'{col}', OLD.{col}" for col in self.get_columns(cursor, table)] )})
+                        'sql', 'DELETE FROM {table} WHERE id = ?',
+                        'parameters', json_array(OLD.id)
                     ), 
-                    CURRENT_TIMESTAMP
+                    CURRENT_TIMESTAMP,
+                    false,
+                    false
                 );
             END;
             """
@@ -106,3 +112,20 @@ class TransactionData(DbConnection):
         cursor.execute(f"PRAGMA table_info({table_name});")
         columns = [row[1] for row in cursor.fetchall()]
         return columns
+
+    def apply_transactions(self, transactions: list[str]):
+        cursor = self.conn.cursor()
+        try:
+            for content in transactions:
+                log_entry = json.loads(content)
+                sql = log_entry.get('sql')
+                parameters = log_entry.get('parameters', [])
+                cursor.execute(sql, parameters)
+            self.conn.commit()
+        except sqlite3.Error as e:
+            self.conn.rollback()
+            raise e
+        finally:
+            self.conn.close()
+
+    
