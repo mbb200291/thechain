@@ -1,7 +1,7 @@
 # from pydantic import BaseModel, HttpUrl
 
 
-# class Urls(BaseModel):
+# class Ips(BaseModel):
 #     url: list[HttpUrl]
 
 

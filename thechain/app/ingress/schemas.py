@@ -5,7 +5,7 @@ from pydantic import BaseModel, HttpUrl
 # from config import GENESIS_BLOCK
 
 # class UrlList(BaseModel):
-#     urls: list[str]
+#     ips: list[str]
 
 class Transaction(BaseModel):
     content: str

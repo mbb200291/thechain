@@ -1,6 +1,6 @@
 import sqlite3
 
-from ..utils import block_management, url_management
+from ..utils import block_management, ip_management
 
 
 def attemp_hangging(blocks):
@@ -20,18 +20,18 @@ def attemp_hangging(blocks):
     return outcomes
 
 
-def register_nodes(urls):
-    url_management.UrlData().extend_urls(urls)
+def register_nodes(ips):
+    ip_management.IpData().extend_urls(ips)
     return True
 
 
-def unregister_nodes(urls):
-    url_management.UrlData().remove_urls(urls)
+def unregister_nodes(ips):
+    ip_management.IpData().remove_urls(ips)
     return True
 
 
 def get_nodes():
-    return url_management.UrlData().get_urls()
+    return ip_management.IpData().get_urls()
     
 
 # def update_blocks(blocks):
