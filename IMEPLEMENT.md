@@ -69,3 +69,9 @@ rand_b64_toks = "ABC="
 print(base64.b64decode(rand_b64_toks.encode('ascii')))  # b'\x00\x10'
 
 ```
+
+# TODO
+
+1. update packed transactions sync status after brocasting (fail)
+2. add trigger to copy transactions from block to transaction tabl (cosider concat transations by some charactor)
+3. logic to apply transactions onto target db 

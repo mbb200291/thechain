@@ -125,7 +125,7 @@ def count_leading_zero(token: bytes) -> int:
     return count
 
 
-def bytes_encode(string: str) -> bytes:
+def  bytes_encode(string: str) -> bytes:
     return base64.b64decode(string.encode('utf8'))  # base64-wise
     # return string.encode('utf8')  # base64-wise
 
@@ -169,8 +169,9 @@ def create_pow_token(
 def create_block(
     predicessor=None,
     transactions=None,
+    ids=None,
 ):
-    transactions = TransactionData().get_unsync_transactions() if transactions is None else transactions
+    ids, transactions = TransactionData().get_unsync_transactions() if transactions is None else (transactions, ids)
     predicessor = BlockData().get_tip() if predicessor is None else predicessor
     block = {
             "nounce": bytes_decode(create_nounce()),
@@ -184,7 +185,7 @@ def create_block(
         bytes_encode(block["proposer_pk"]),
         bytes_encode(block["nounce"]),
     ))
-    return block
+    return ids, block
 
 
 def verify_block_attribute(block) -> bool:
@@ -203,9 +204,9 @@ def verify_block_pow(x: bytes) -> bool:
 
 
 def verify(block) -> bool:
-    logger.debug('>1', verify_block_pow(bytes_encode(block['pow_token'])))
-    logger.debug('>2', verify_block_attribute(block))
-    logger.debug('>3', BlockData().check_block_existence(block['predicessor']))
+    logger.info('>1', verify_block_pow(bytes_encode(block['pow_token'])))
+    logger.info('>2', verify_block_attribute(block))
+    logger.info('>3', BlockData().check_block_existence(block['predicessor']))
     return (
         verify_block_pow(bytes_encode(block['pow_token']))  # have to smaller than tau
         and verify_block_attribute(block)  # satisafy hash rule

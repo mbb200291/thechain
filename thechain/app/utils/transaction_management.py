@@ -18,7 +18,7 @@ class TransactionData(DbConnection):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 content TEXT NOT NULL,
                 datetime Datetime NOT NULL,
-                sync BOOLEAN
+                sync BOOLEAN,
                 apply BOOLEAN
             )
         ''')
@@ -27,14 +27,28 @@ class TransactionData(DbConnection):
         self.conn.close()
         # return self
 
+    def update_to_synced(self, ids: list[int]):
+        cursor = self.conn.cursor()
+        cursor.executemany(
+            '''UPDATE Transactions
+            SET sync = 1
+            WHERE id = ?;
+            ''', [(id,) for id in ids]
+        )
+        self.conn.commit()
+        self.conn.close()
+    
     def get_unsync_transactions(self) -> str:
         cursor = self.conn.cursor()
         cursor.execute(
-            "SELECT content FROM Transactions WHERE sync = false", ()
+            "SELECT id, content FROM Transactions WHERE sync = false", ()
         )
-        transactions = cursor.fetchall()
+        data = cursor.fetchall()
+        if len(data) == 0:
+            return [], ""
+        ids, transactions = zip(*data)
         self.conn.close()
-        return json.dumps(transactions)
+        return ids, json.dumps(transactions)
 
     def bind_target_tabs(self, excluded_tables: list[str]):
         cursor = self.conn.cursor()

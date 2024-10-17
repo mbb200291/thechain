@@ -51,7 +51,7 @@ async def get_blocks() -> list[Block]:
 @router.post('/block/testcreate')
 async def create_block(predicessor: Optional[str] = None,
                        transactions: Optional[str] = None) -> Block:
-    block = block_management.create_block(predicessor, transactions)
+    _, block = block_management.create_block(predicessor, transactions)
     return block
 
 

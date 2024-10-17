@@ -31,7 +31,7 @@ def unregister_nodes(ips):
 
 
 def get_nodes():
-    return ip_management.IpData().get_urls()
+    return ip_management.IpData().get_ips()
     
 
 # def update_blocks(blocks):
