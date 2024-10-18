@@ -67,7 +67,7 @@ class BlockData(DbConnection):
         self.conn.close()
         return 1
 
-    def get_tip(self) -> str:
+    def get_tip_pow(self) -> str:
         cursor = self.conn.cursor()
         cursor.execute(
             '''
@@ -76,6 +76,17 @@ class BlockData(DbConnection):
         tip_pow_token = cursor.fetchone()[0]
         self.conn.close()
         return tip_pow_token
+    
+    def get_block(self, id: str) -> str:
+        cursor = self.conn.cursor()
+        cursor.execute(
+            '''
+            SELECT * FROM Blocks WHERE pow_token = ?;
+            ''', id)
+        row = cursor.fetchone()
+        columns = [col[0] for col in cursor.description]
+        self.conn.close()
+        return dict(zip(columns, row))
     
     def dump_all_blocks(self):
         cursor = self.conn.cursor()
@@ -108,14 +119,23 @@ class BlockData(DbConnection):
     #     self.conn.close()
     #     return 1
 
-    
+    def iter_lonest_unapply_tx(self):
+        # transactions_seq = []
+        cur_block = self.get_block(self.get_tip_pow())
+        while cur_block["depth"] >= 0:
+            # transactions_seq.append(cur_block["transactions"])
+            yield cur_block["transactions"]
+            cur_block = self.get_block(cur_block["predicessor"])
+        # return transactions_seq
+ 
+        
 def bytes_to_binary_string(bytes_obj):
     return ''.join(format(byte, '08b') for byte in bytes_obj)
 
 
 def count_leading_zero(token: bytes) -> int:
     token_str = bytes_to_binary_string(token)
-    logger.debug('bins:', token_str)
+    logger.debug('bins: ' + token_str)
     count = 0
     for i in token_str:
         if i == '0':
@@ -172,7 +192,7 @@ def create_block(
     ids=None,
 ):
     ids, transactions = TransactionData().get_unsync_transactions() if transactions is None else (transactions, ids)
-    predicessor = BlockData().get_tip() if predicessor is None else predicessor
+    predicessor = BlockData().get_tip_pow() if predicessor is None else predicessor
     block = {
             "nounce": bytes_decode(create_nounce()),
             "predicessor": predicessor,
@@ -199,14 +219,14 @@ def verify_block_attribute(block) -> bool:
 
 def verify_block_pow(x: bytes) -> bool:
     leading_zero = count_leading_zero(x)
-    logger.debug("leading zero:", leading_zero)
+    logger.debug("leading zero: %d"%leading_zero)
     return leading_zero >= TAU
 
 
 def verify(block) -> bool:
-    logger.info('>1', verify_block_pow(bytes_encode(block['pow_token'])))
-    logger.info('>2', verify_block_attribute(block))
-    logger.info('>3', BlockData().check_block_existence(block['predicessor']))
+    logger.debug(f"#verify_block_pow: {verify_block_pow(bytes_encode(block['pow_token']))}")
+    logger.debug(f'#verify_block_attribute: {verify_block_attribute(block)}') 
+    logger.debug(f"#check_block_existence: {BlockData().check_block_existence(block['predicessor'])}")
     return (
         verify_block_pow(bytes_encode(block['pow_token']))  # have to smaller than tau
         and verify_block_attribute(block)  # satisafy hash rule

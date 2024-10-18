@@ -141,5 +141,3 @@ class TransactionData(DbConnection):
             raise e
         finally:
             self.conn.close()
-
-    

@@ -11,7 +11,8 @@ dotenv.load_dotenv()
 
 # TAU = 128
 # TAU = 10
-TAU = 7
+# TAU = 7
+TAU = 11
 SEED_IPS = ['http://localhost:7573']
 # GENESIS_BLOCK = "thegenesisblock"
 GENESIS_BLOCK = "thegenesisblock="

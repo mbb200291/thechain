@@ -28,7 +28,7 @@ def get_normal_formator():
     return formatter
 
 
-def setup_logger(name, log_file='app.log', level=logging.INFO):
+def setup_logger(name, log_file='app.log', level=logging.DEBUG):
 
 
     console_handler = logging.StreamHandler(sys.stdout)

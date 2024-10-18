@@ -27,17 +27,17 @@ def create_pow_token(
     return hasher.digest()
 ```
 
-# Base64
+## Base64
 
-## encode
+### encode
 
 char seq => map to utf8 as byte seq => interprete bytes seq by base64-wise => char seq
 
-## decode
+### decode
 
 char seq => map to base64 byte seq => interterpte byte seq by utf8 => char seq
 
-## base64 encoding
+### base64 encoding
 
 轉換流程
 
@@ -70,8 +70,9 @@ print(base64.b64decode(rand_b64_toks.encode('ascii')))  # b'\x00\x10'
 
 ```
 
-# TODO
+## TODO
 
-1. update packed transactions sync status after brocasting (fail)
-2. add trigger to copy transactions from block to transaction tabl (cosider concat transations by some charactor)
-3. logic to apply transactions onto target db 
+- add triggering logic to select transactions on lognest block chain.
+- logic to apply transactions onto target db
+  - v1: create reverse operation on these operation step
+  - v2: revese back to some of switch ppoint and re-apply targe transacitons
