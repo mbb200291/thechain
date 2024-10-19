@@ -141,3 +141,15 @@ class TransactionData(DbConnection):
             raise e
         finally:
             self.conn.close()
+
+    def insert_tx(content: str):
+        raise NotADirectoryError()  # TODO: have to be able to distingush tx from local or outside to control brocasting behave
+    
+    def isin(tx) -> bool:
+        raise NotImplementedError()
+    
+    def remove_tx(tx) -> bool:
+        raise NotImplementedError()
+
+    def undo_tx(tx) -> bool:
+        raise NotImplementedError()  # TODO: have to make sure undo sql not trigger insert to tx

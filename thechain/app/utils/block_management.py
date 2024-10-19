@@ -119,7 +119,7 @@ class BlockData(DbConnection):
     #     self.conn.close()
     #     return 1
 
-    def iter_lonest_unapply_tx(self):
+    def iter_lonest_tx(self):
         # transactions_seq = []
         cur_block = self.get_block(self.get_tip_pow())
         while cur_block["depth"] >= 0:
