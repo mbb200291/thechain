@@ -2,7 +2,7 @@ import json
 
 import sqlite3
 
- from ..utils import block_management, ip_management, transaction_management
+from ..utils import block_management, ip_management, transaction_management
 
 
 def attemp_hangging(blocks):

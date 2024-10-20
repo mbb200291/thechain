@@ -15,10 +15,10 @@ class TransactionData(DbConnection):
         
         cursor.execute('''
             CREATE TABLE Transactions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id TEXT PRIMARY KEY,
                 content TEXT NOT NULL,
                 datetime Datetime NOT NULL,
-                local BOOLEAN
+                sync BOOLEAN
             )
         ''')
 
@@ -45,9 +45,11 @@ class TransactionData(DbConnection):
         data = cursor.fetchall()
         if len(data) == 0:
             return [], ""
+        
         ids, transactions = zip(*data)
+        idtransactions = {k: v for k, v in zip(ids, transactions)}
         self.conn.close()
-        return ids, json.dumps(transactions)
+        return ids, json.dumps(idtransactions)
 
     def bind_target_tabs(self, excluded_tables: list[str]):
         cursor = self.conn.cursor()
@@ -129,7 +131,7 @@ class TransactionData(DbConnection):
         columns = [row[1] for row in cursor.fetchall()]
         return columns
 
-    def local_transactions(self, transactions: list[str]):
+    def apply_tx(self, transactions: list[str]):
         cursor = self.conn.cursor()
         try:
             for content in transactions:
