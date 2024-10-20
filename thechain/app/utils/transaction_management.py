@@ -156,7 +156,7 @@ class TransactionData(DbConnection):
     def undo_tx(tx) -> bool:
         raise NotImplementedError()  # TODO: have to make sure undo sql not trigger insert to tx
     
-    def undo_txes(self, txes):  # TODO
+    def undo_txes(self, txes):  # TODO: consider a version rollback by db backup => on each block level
         cursor = self.conn.cursor()
         cursor.execute("PRAGMA foreign_keys = OFF;")
 
