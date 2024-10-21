@@ -1,4 +1,5 @@
 import json
+import uuid
 
 import sqlite3
 
@@ -26,7 +27,7 @@ class TransactionData(DbConnection):
         self.conn.close()
         # return self
 
-    def update_to_synced(self, ids: list[int]):
+    def update_to_synced(self, ids: list[str]):
         cursor = self.conn.cursor()
         cursor.executemany(
             '''UPDATE Transactions
@@ -65,8 +66,9 @@ class TransactionData(DbConnection):
             CREATE TRIGGER IF NOT EXISTS after_insert_{table}
             AFTER INSERT ON {table}
             BEGIN
-                INSERT INTO Transactions (content, datetime, sync)
+                INSERT INTO Transactions (id, content, datetime, sync)
                 VALUES (
+                    (SELECT hex(randomblob(16))),
                     json_object(
                         'operation', 'INSERT',
                         'table', '{table}',
@@ -84,8 +86,9 @@ class TransactionData(DbConnection):
             CREATE TRIGGER IF NOT EXISTS after_update_{table}
             AFTER UPDATE ON {table}
             BEGIN
-                INSERT INTO Transactions (content, datetime, sync)
+                INSERT INTO Transactions (id, content, datetime, sync)
                 VALUES (
+                    (SELECT hex(randomblob(16))),
                     json_object(
                         'operation', 'UPDATE',
                         'table', '{table}',
@@ -105,8 +108,9 @@ class TransactionData(DbConnection):
             CREATE TRIGGER IF NOT EXISTS after_delete_{table}
             AFTER DELETE ON {table}
             BEGIN
-                INSERT INTO Transactions (content, datetime, sync)
+                INSERT INTO Transactions (id, content, datetime, sync)
                 VALUES (
+                    (SELECT hex(randomblob(16))),
                     json_object(
                         'operation', 'DELETE',
                         'table', '{table}',
@@ -146,9 +150,17 @@ class TransactionData(DbConnection):
         finally:
             self.conn.close()
 
-    def insert_tx(content: str):
-        raise NotADirectoryError()  # TODO: have to be able to distingush tx from local or outside to control brocasting behavior
-    
+    def insert_tx(self, content: str):
+        # raise NotADirectoryError()  # TODO: have to be able to distingush tx from local or outside to control brocasting behavior
+        sql = f"INSERT INTO {self.TABNAME} (id, content) VALUES (
+            (SELECT hex(randomblob(16))),
+            ?
+            )"
+        cursor = self.conn.cursor()
+        cursor.execute(sql, (id, content))
+        self.conn.close()
+        return cursor.lastrowid
+
     def isin(tx) -> bool:
         raise NotImplementedError()
     
@@ -158,7 +170,7 @@ class TransactionData(DbConnection):
     def undo_tx(tx) -> bool:
         raise NotImplementedError()  # TODO: have to make sure undo sql not trigger insert to tx
     
-    def undo_txes(self, txes):  # TODO: consider a version rollback by db backup => on each block level
+    def undo_txes(self, cursor, txes):  # TODO: consider a version rollback by db backup => on each block level
         cursor = self.conn.cursor()
         cursor.execute("PRAGMA foreign_keys = OFF;")
 

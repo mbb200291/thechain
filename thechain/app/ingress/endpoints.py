@@ -30,8 +30,8 @@ async def get_operation_nodes() -> list[HttpUrl]:
 async def hang_block(block: Block):
     block = block.model_dump()
     result = attemp_hangging([block])
-    sync_transaction_consensus()
     if result[0]:
+        sync_transaction_consensus()
         return {"status": 1}
     else:
         return {"status": "reject"}
@@ -61,6 +61,6 @@ async def testconn():
     return 1
 
 
-@router.post('/transaction')
-async def insert_transaction(transactions: list[Transaction]):
-    return 1
+# @router.post('/transaction')
+# async def insert_transaction(transactions: list[Transaction]):
+#     return 1
