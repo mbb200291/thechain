@@ -161,7 +161,7 @@ class TransactionData(DbConnection):
         self.conn.close()
         return cursor.lastrowid
 
-    def isin(tx) -> bool:
+    def exist(tx) -> bool:
         raise NotImplementedError()
     
     def remove_tx(tx) -> bool:

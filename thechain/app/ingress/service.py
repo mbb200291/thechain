@@ -34,7 +34,7 @@ def unregister_nodes(ips):
 
 def get_nodes():
     return ip_management.IpData().get_ips()
-    
+
 
 # def update_blocks(blocks):
 #     return block_management.BlockData().update_blocks(blocks)
@@ -42,12 +42,11 @@ def get_nodes():
 
 def sync_transaction_consensus():
     # with session:  # TODO: 
-    for b in block_management.BlockData().iter_lonest_tx():
+    for b in block_management.BlockData().iter_longest_tx():
         # get transactions by giving b.transactions
         for tx in json.loads(b["content"]):
-            if transaction_management.TransactionData().isin_tab(tx):
+            if not transaction_management.TransactionData().exist(tx):
                 transaction_management.TransactionData().insert_tx(tx["content"])
             else:
                 transaction_management.TransactionData().undo_tx(tx["content"])
                 transaction_management.TransactionData().remove_tx(tx["content"])
-    # session.commit() # TODO: 
